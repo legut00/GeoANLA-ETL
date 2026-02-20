@@ -20,19 +20,19 @@ def normalizar_nombre(texto):
 
 
 
-# 2. Cargar datos del CSV
-# Obtiene la ruta de la carpeta donde está este archivo .py
+# 2. Cargar datos del CSV (NUEVA LÓGICA)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-# Sube dos niveles y entra a data/raw
-PATH_MUNICIPIOS = os.path.join(BASE_DIR, "..", "..", "..", "data", "raw", "municipios_codigos.csv")
+# Ahora el archivo está en una subcarpeta 'data' dentro de 'catalog'
+PATH_MUNICIPIOS = os.path.join(BASE_DIR, "data", "municipios_codigos.csv")
 
 if not os.path.exists(PATH_MUNICIPIOS):
-    raise FileNotFoundError(
-        f"No se encontró el archivo de municipios en: {PATH_MUNICIPIOS}. "
-        "Asegúrate de haber descargado los datos en la carpeta data/raw."
-    )
+    # Intentar una ruta alternativa por si acaso (para desarrollo local)
+    PATH_MUNICIPIOS_ALT = os.path.join(BASE_DIR, "..", "..", "..", "data", "raw", "municipios_codigos.csv")
+    if os.path.exists(PATH_MUNICIPIOS_ALT):
+        PATH_MUNICIPIOS = PATH_MUNICIPIOS_ALT
+    else:
+        raise FileNotFoundError(f"No se encontró el archivo en {PATH_MUNICIPIOS}")
 
-# Asegúrate de que las columnas se llamen 'id' (código) y 'nombre'
 df_mun = pd.read_csv(PATH_MUNICIPIOS, dtype={'id': str})
 
 # Rellenamos ceros a la izquierda (ej. 5001 -> 05001)
