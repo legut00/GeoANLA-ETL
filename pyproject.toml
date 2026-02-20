@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geoanla"
+version = "0.1.0"
+description = "Librería ETL para validación de datos geográficos del ANLA"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "pandas>=2.0.0",
+    "geopandas>=0.14.0",
+    "pydantic>=2.0.0",
+    "polars>=0.20.0",
+    "fastexcel"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
