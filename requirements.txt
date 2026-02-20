@@ -1,1 +1,6 @@
-pydantic>=2.0\ngeopandas>=0.14.0\npandas>=2.0.0\nfastexcel
+pydantic>=2.0
+geopandas>=0.14.0
+pandas>=2.0.0
+fastexcel
+polars>=0.20.0
+shapely>=2.0.0
