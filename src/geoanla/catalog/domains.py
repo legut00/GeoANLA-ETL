@@ -679,3 +679,219 @@ class Dom_Regeneracion(int, Enum):
             3: "Latizal"
         }
         return descripciones.get(self.value)
+
+class Dom_CAR(float, Enum):
+    """
+    Dominio: Dom_CAR
+    Descripción: Autoridades ambientales (Corporaciones Autónomas Regionales y otras).
+    Tipo en GDB: Double 8
+    """
+    AMVA = 1001.0
+    CAM = 1002.0
+    CAR = 1003.0
+    CARDER = 1004.0
+    CARDIQUE = 1005.0
+    CARSUCRE = 1006.0
+    CAS = 1007.0
+    CDA = 1008.0
+    CDMB = 1009.0
+    CODECHOCO = 1010.0
+    CORALINA = 1011.0
+    CORANTIOQUIA = 1012.0
+    CORMACARENA = 1013.0
+    CORNARE = 1014.0
+    CORPAMAG = 1015.0
+    CORPOAMAZONIA = 1016.0
+    CORPOBOYACA = 1017.0
+    CORPOCALDAS = 1018.0
+    CORPOCESAR = 1019.0
+    CORPOCHIVOR = 1020.0
+    CORPOGUAJIRA = 1021.0
+    CORPOGUAVIO = 1022.0
+    CORPOMOJANA = 1023.0
+    CORPONARINO = 1024.0
+    CORPONOR = 1025.0
+    CORPORINOQUIA = 1026.0
+    CORPOURABA = 1027.0
+    CORTOLIMA = 1028.0
+    CRA = 1029.0
+    CRC = 1030.0
+    CRQ = 1031.0
+    CSB = 1032.0
+    CVC = 1033.0
+    CVS = 1034.0
+    DADMA = 1035.0
+    DAGMA = 1036.0
+    DAMAB = 1037.0
+    EPA = 1038.0
+    SDA = 1039.0
+    MADS = 1040.0
+    SPNN = 1041.0
+
+    @property
+    def descripcion(self):
+        descripciones = {
+            1001.0: "AMVA",
+            1002.0: "CAM",
+            1003.0: "CAR",
+            1004.0: "CARDER",
+            1005.0: "CARDIQUE",
+            1006.0: "CARSUCRE",
+            1007.0: "CAS",
+            1008.0: "CDA",
+            1009.0: "CDMB",
+            1010.0: "CODECHOCO",
+            1011.0: "CORALINA",
+            1012.0: "CORANTIOQUIA",
+            1013.0: "CORMACARENA",
+            1014.0: "CORNARE",
+            1015.0: "CORPAMAG",
+            1016.0: "CORPOAMAZONIA",
+            1017.0: "CORPOBOYACA",
+            1018.0: "CORPOCALDAS",
+            1019.0: "CORPOCESAR",
+            1020.0: "CORPOCHIVOR",
+            1021.0: "CORPOGUAJIRA",
+            1022.0: "CORPOGUAVIO",
+            1023.0: "CORPOMOJANA",
+            1024.0: "CORPONARIÑO",
+            1025.0: "CORPONOR",
+            1026.0: "CORPORINOQUIA",
+            1027.0: "CORPOURABA",
+            1028.0: "CORTOLIMA",
+            1029.0: "CRA",
+            1030.0: "CRC",
+            1031.0: "CRQ",
+            1032.0: "CSB",
+            1033.0: "CVC",
+            1034.0: "CVS",
+            1035.0: "DADMA",
+            1036.0: "DAGMA",
+            1037.0: "DAMAB",
+            1038.0: "EPA",
+            1039.0: "SDA",
+            1040.0: "MADS",
+            1041.0: "SPNN"
+        }
+        return descripciones.get(self.value)
+
+class Dom_Tipo_Actadmin(float, Enum):
+    """
+    Dominio: Dom_Tipo_Actadmin
+    Descripción: Tipo de acto administrativo (Auto o Resolución).
+    Tipo en GDB: Double 8
+    """
+    AUTO = 1.0
+    RESOLUCION = 2.0
+
+    @property
+    def descripcion(self):
+        descripciones = {
+            1.0: "Auto",
+            2.0: "Resolución"
+        }
+        return descripciones.get(self.value)
+
+class Dom_SubAct_Comp(float, Enum):
+    """
+    Dominio: Dom_SubAct_Comp
+    Descripción: Subactividades asociadas a las medidas de compensación.
+    Tipo en GDB: Double 8
+    """
+    APOYO_AREAS_PUBLICAS = 1201.0
+    CREAR_AREAS_PRIVADAS = 1202.0
+    ACUERDOS_CONSERVACION = 1203.0
+    RESTAURACION_ECOLOGICA = 1204.0
+    REHABILITACION = 1205.0
+    RECUPERACION = 1206.0
+    REFORESTACION_PROTECTORA = 1207.0
+    HERRAMIENTAS_MANEJO_PAISAJE = 1208.0
+    SANEAMIENTO_PREDIAL = 1209.0
+    AMPLIACION_RESTAURACION = 1210.0
+    OTRA = 1211.0
+
+    @property
+    def descripcion(self):
+        descripciones = {
+            1201.0: "Apoyo creación nuevas áreas protegidas publicas y su plan de manejo ambiental",
+            1202.0: "Crear nuevas áreas protegidas privadas y su plan de manejo ambiental",
+            1203.0: "Establecer acuerdos de conservación, servidumbre ecológicas, Incentivos para mantenimiento y conservación de las áreas",
+            1204.0: "Restauración ecológica",
+            1205.0: "Rehabilitación",
+            1206.0: "Recuperación",
+            1207.0: "Reforestación protectora",
+            1208.0: "Herramienta de manejo de paisaje, proyectos silvopastoriles, agroforestales, silviculturales, etc) en áreas agrícolas y ganaderas",
+            1209.0: "Saneamientos predial/restauración ecológica",
+            1210.0: "Ampliación y restauración ecológica",
+            1211.0: "Otra"
+        }
+        return descripciones.get(self.value)
+
+
+class Dom_Otras_Comp(float, Enum):
+    """
+    Dominio: Dom_Otras_Comp
+    Descripción: Otras medidas de compensación u obligaciones.
+    Tipo en GDB: Double 8
+    """
+    APROVECHAMIENTO_FORESTAL = 20101.0
+    CONCESION_AGUAS = 20102.0
+    CONTINGENCIAS = 20103.0
+    EMISIONES_ATMOSFERICAS = 20104.0
+    LEVANTAMIENTO_VEDAS = 20105.0
+    MULTAS_SANCIONES = 20106.0
+    OCUPACION_CAUCE = 20107.0
+    PAISAJE = 20108.0
+    TALA_PODA = 20110.0
+    VERTIMIENTO = 20111.0
+    RESIDUOS_SOLIDOS = 20112.0
+    SUSTRACCION_RESERVAS = 20113.0
+    CAMBIO_COBERTURA_USO = 20114.0
+    OTRA = 20115.0
+
+    @property
+    def descripcion(self):
+        descripciones = {
+            20101.0: "Aprovechamiento forestal",
+            20102.0: "Concesión de aguas",
+            20103.0: "Contingencias",
+            20104.0: "Emisiones atmosféricas",
+            20105.0: "Levantamiento de vedas",
+            20106.0: "Multas o sanciones",
+            20107.0: "Ocupación de cauce",
+            20108.0: "Paisaje",
+            20110.0: "Permiso de tala y poda",
+            20111.0: "Permiso de vertimiento",
+            20112.0: "Residuos sólidos",
+            20113.0: "Sustracción de áreas en las reservas forestales (la Ley 2ª de 1959)",
+            20114.0: "Cambio de cobertura y uso del suelo",
+            20115.0: "Otra"
+        }
+        return descripciones.get(self.value)
+
+class Dom_EstInver(float, Enum):
+    """
+    Dominio: Dom_EstInver
+    Descripción: Estado de la inversión (usualmente para la Inversión del 1%).
+    Tipo en GDB: Double 8
+    """
+    EVALUACION = 35001.0
+    APROBADO_POR_EJECUTAR = 35002.0
+    APROBADO_EN_EJECUCION = 35003.0
+    EJECUTADO = 35004.0
+    NO_SE_EJECUTO = 35005.0
+    NO_VIABLE = 35006.0
+    MODIFICADO = 35007.0
+
+    @property
+    def descripcion(self):
+        descripciones = {
+            35001.0: "Evaluación",
+            35002.0: "Aprobado por ejecutar",
+            35003.0: "Aprobado en ejecución",
+            35004.0: "Ejecutado",
+            35005.0: "No se ejecutó",
+            35006.0: "No viable",
+            35007.0: "Modificado"
+        }
+        return descripciones.get(self.value)
