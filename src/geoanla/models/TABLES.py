@@ -152,7 +152,7 @@ class MuestreoFloraResultadosTB(BaseEV):
 
     # --- VALIDACIONES DE CAMPO (FIELD VALIDATORS) ---
 
-    @field_validator('ABUNDANCIA', 'ABUND_REL', 'FRECUENCIA', 'FRECU_REL', 'DOMINANCIA', 'DOM_REL', 'IVI', mode='before')
+    @field_validator('ABUNDANCIA', 'ABUND_REL', 'FRECUENCIA', 'FRECU_REL', 'DOMINANCIA', 'DOMIN_REL', 'IVI', mode='before')
     @classmethod
     def validar_estructura_y_limpieza(cls, v):
         # 1. BLOQUEO DE NULOS Y VACÍOS:
