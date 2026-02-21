@@ -1,15 +1,4 @@
-from .T_20_BIOTICO_CONTI_COSTE import (
-    PuntoMuestreoFlora,
-    PuntoMuestreoVeda,
-    CoberturaTierra,
-    PuntoMuestreoFauna,
-    TransectoMuestreoFauna
-)
-
-__all__ = [
-    "PuntoMuestreoFlora",
-    "PuntoMuestreoVeda",
-    "CoberturaTierra",
-    "PuntoMuestreoFauna",
-    "TransectoMuestreoFauna"
-]
+# src/geoanla/models/__init__.py
+# Este archivo se mantiene vacío intencionalmente para obligar a realizar
+# importaciones explícitas desde los submódulos. 
+# Ejemplo: from geoanla.models.nombre_archivo import Clase
