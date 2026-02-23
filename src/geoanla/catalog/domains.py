@@ -895,3 +895,42 @@ class Dom_EstInver(float, Enum):
             35007.0: "Modificado"
         }
         return descripciones.get(self.value)
+
+class Dom_ModInterv(float, Enum):
+    """
+    Dominio: Dom_ModInterv
+    Descripción: Estrategia de intervención implementada para la siembra.
+    Tipo en GDB: Double 8
+    """
+    BARRERA_VIVA = 10.0
+    AGROFORESTAL = 11.0
+    PRODUCTORA = 12.0
+    PRODUCTORA_PROTECTORA = 13.0
+    PROTECTORA = 14.0
+    CORTINAS_ROMPEVIENTOS = 15.0
+    CERCAS_VIVAS = 16.0
+    MONOCULTIVO_PLANTACION_PROTECTORA = 17.0
+    CORREDOR_BIOLOGICO = 18.0
+    ENRIQUECIMIENTO = 19.0
+    REGENERACION_NATURAL_ASISTIDA = 20.0
+    BIOREMEDIACION = 21.0
+    OTRA_ESTRATEGIA = 22.0
+
+    @property
+    def descripcion(self):
+        descripciones = {
+            10.0: "Barrera viva",
+            11.0: "Agroforestal",
+            12.0: "Productora",
+            13.0: "Productora - Protectora",
+            14.0: "Protectora",
+            15.0: "Cortinas Rompevientos",
+            16.0: "Cercas vivas",
+            17.0: "Monocultivo (Plantación Protectora)",
+            18.0: "Corredor Biológico",
+            19.0: "Enriquecimiento",
+            20.0: "Regeneración Natural Asistida",
+            21.0: "Bioremediación",
+            22.0: "Otra estrategia"
+        }
+        return descripciones.get(self.value)

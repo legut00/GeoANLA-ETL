@@ -13,7 +13,8 @@ from geoanla.catalog import (
     Dom_Habito,
     Dom_Regeneracion,
     Dom_Tipo_Actadmin,
-    Dom_EstInver
+    Dom_EstInver,
+    Dom_ModInterv
 )
 import math
 
@@ -400,4 +401,93 @@ class Seg_IndicadoresTB(BaseEV):
                     f"Cronología de periodo inválida: FECHA_FIN ({self.FECHA_FIN}) "
                     f"no puede ser anterior a FECHA_INI ({self.FECHA_INI})."
                 )
+        return self
+
+class Seg_EspSembradaTB(BaseEV):
+    """
+    Tabla: Seg_EspSembradaTB
+    Descripción: Seguimiento Especies Sembradas en Compensaciones e inversiones 1%.
+    Determina las especies sembradas en las áreas de compensación o inversión.
+    """
+    model_config = ConfigDict(
+        use_enum_values=True,
+        validate_assignment=True,
+        populate_by_name=True
+    )
+
+    # === BLOQUE 1: IDENTIFICACIÓN Y RELACIONES ===
+    EXPEDIENTE: str = Field(..., max_length=20)
+    ID_COMP: Optional[str] = Field(None, max_length=20)
+    ID_OT_COMP: Optional[str] = Field(None, max_length=20)
+    ID_INVER: Optional[str] = Field(None, max_length=20)
+    ID_INV_PG: Optional[str] = Field(None, max_length=20)
+
+    # === BLOQUE 2: DETALLES DE SIEMBRA ===
+    FECHA_SIEM: date = Field(...)
+    ESPEC_SEMB: str = Field(..., max_length=100)
+    AREA_ESPEC: float = Field(..., ge=0.0)
+    ALTUR_SEMB: float = Field(..., ge=0.0)
+    DAP_SEMB: float = Field(..., ge=0.0)
+    DEN_MADERA: Optional[float] = Field(None, ge=0.0)
+    INDIV_SEMB: float = Field(..., ge=0.0)
+    DEN_SIEMB: float = Field(..., ge=0.0)
+
+    # === BLOQUE 3: ESTRATEGIA DE INTERVENCIÓN ===
+    MOD_INTERV: Dom_ModInterv = Field(...)
+    OT_MOD_INT: Optional[str] = Field(None, max_length=100)
+
+    # === BLOQUE 4: SUPERVIVENCIA ===
+    # Le agregamos le=100.0 directo en el Field porque la tabla exige que sean porcentajes (0-100)
+    SUPERV: float = Field(..., ge=0.0, le=100.0)
+    TOT_IN_SMB: float = Field(..., ge=0.0)
+    TOT_SUPERV: float = Field(..., ge=0.0, le=100.0)
+
+    # === BLOQUE 5: MANTENIMIENTO ===
+    T_MANTENIM: float = Field(..., ge=0.0)
+    MANT_PER: int = Field(..., ge=0)
+    MANT_TOT: str = Field(..., max_length=20)
+    FREC_MANT: str = Field(..., max_length=50)
+    FEC_MANT: Optional[date] = Field(None)
+    ACT_MANT: str = Field(..., max_length=100)
+
+    # === BLOQUE 6: CONTROL ===
+    FECHA_INFO: date = Field(...)
+    OBSERV: Optional[str] = Field(None, max_length=255)
+
+    # ==========================================
+    # VALIDACIONES LÓGICAS (REGLAS DE NEGOCIO)
+    # ==========================================
+
+    @model_validator(mode='after')
+    def validar_llave_foranea(self) -> 'Seg_EspSembradaTB':
+        """
+        Garantiza que el registro esté atado a por lo menos una inversión o compensación,
+        tal como lo exige el diccionario de datos.
+        """
+        ids_relacionales = [
+            self.ID_COMP, self.ID_OT_COMP, self.ID_INVER, self.ID_INV_PG
+        ]
+        
+        if not any(bool(identificador) for identificador in ids_relacionales):
+            raise ValueError(
+                "Fallo de integridad: Debe diligenciar al menos uno de los campos de relación "
+                "(ID_COMP, ID_OT_COMP, ID_INVER, ID_INV_PG)."
+            )
+        return self
+
+    @model_validator(mode='after')
+    def validar_condicional_otra_estrategia(self) -> 'Seg_EspSembradaTB':
+        """Si la estrategia de intervención es 'Otra estrategia', se debe especificar cuál."""
+        # 22.0 es el código de 'Otra estrategia' según tu dominio Dom_ModInterv
+        if self.MOD_INTERV == 22.0: 
+            if not self.OT_MOD_INT:
+                raise ValueError("Inconsistencia: Si 'MOD_INTERV' es 'Otra estrategia', debe diligenciar el campo 'OT_MOD_INT'.")
+        return self
+
+    @model_validator(mode='after')
+    def validar_fechas_cronologicas(self) -> 'Seg_EspSembradaTB':
+        """Asegura la coherencia temporal de las fechas de siembra y mantenimiento."""
+        if self.FEC_MANT and self.FECHA_SIEM:
+            if self.FEC_MANT < self.FECHA_SIEM:
+                raise ValueError(f"Cronología: La fecha del último mantenimiento ({self.FEC_MANT}) no puede ser anterior a la siembra ({self.FECHA_SIEM}).")
         return self
