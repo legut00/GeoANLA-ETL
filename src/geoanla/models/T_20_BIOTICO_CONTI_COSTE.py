@@ -28,6 +28,8 @@ class PuntoMuestreoFlora(BaseEV_Geo): # ✅ CORREGIDO: Hereda de BaseEV_Geo
         populate_by_name=True
     )
 
+    _campo_leyenda: ClassVar[str] = "N_COBERT"
+
     # === INFORMACIÓN ADMINISTRATIVA ===
     EXPEDIENTE: Optional[str] = Field(None, max_length=20)
     OPERADOR: str = Field(..., max_length=100)
@@ -110,6 +112,8 @@ class PuntoMuestreoVeda(BaseEV_Geo): # Hereda de BaseEV_Geo para soporte de geom
         populate_by_name=True  # Permite usar el nombre del campo o el alias de la GDB
     )
 
+    _campo_leyenda: ClassVar[str] = "N_COBERT"
+
     # === BLOQUE 1: INFORMACIÓN ADMINISTRATIVA ===
     EXPEDIENTE: Optional[str] = Field(None, max_length=20)
     OPERADOR: str = Field(..., max_length=100)
@@ -184,6 +188,8 @@ class CoberturaTierra(BaseEV_Geo):
         populate_by_name=True
     )
 
+    _campo_leyenda: ClassVar[str] = "OBSERV"
+
     # === IDENTIFICACIÓN ===
     EXPEDIENTE: Optional[str] = Field(None, max_length=20, description="Número de expediente ANLA")
     OPERADOR: str = Field(..., max_length=100, description="Empresa solicitante o titular")
@@ -219,18 +225,7 @@ class CoberturaTierra(BaseEV_Geo):
             return None
         return v
 
-    # --- CATÁLOGO DE DESCRIPCIONES OFICIALES ---
-
-    _catalogo_descripciones: ClassVar[dict] = {
-        int(item.value): item.descripcion
-        for dom in [
-            Dom_CateCober, Dom_SubcatCober, Dom_Clas_Cober,
-            Dom_Subclas_Cober, Dom_Nivel5_Cober, Dom_Nivel6_Cober
-        ]
-        for item in dom
-    }
-
-    # --- VALIDACIONES LÓGICAS ---
+    # --- VALIDACIONES LÓGICAS (ESPECÍFICAS DE COBERTURA) ---
 
     @model_validator(mode='after')
     def validar_nomenclatura_consistente(self):
@@ -280,21 +275,6 @@ class CoberturaTierra(BaseEV_Geo):
 
         return self
 
-    @model_validator(mode='after')
-    def validar_leyenda_observ(self):
-        """
-        Valida que la leyenda en OBSERV coincida EXACTAMENTE con la descripción
-        oficial del código NOMENCLAT según el catálogo Corine Land Cover.
-        """
-        if self.OBSERV is not None:
-            descripcion_oficial = self._catalogo_descripciones.get(self.NOMENCLAT)
-            if descripcion_oficial is not None and self.OBSERV != descripcion_oficial:
-                raise ValueError(
-                    f"La leyenda '{self.OBSERV}' no corresponde al código NOMENCLAT {self.NOMENCLAT}. "
-                    f"La descripción oficial es: '{descripcion_oficial}'"
-                )
-        return self
-
 # --- CLASE MAESTRA: PuntoMuestreoFauna (CON GEOMETRÍA) ---
 class PuntoMuestreoFauna(BaseEV_Geo):
     # 1. CONFIGURACIÓN (Idéntica a Flora)
@@ -304,6 +284,8 @@ class PuntoMuestreoFauna(BaseEV_Geo):
         arbitrary_types_allowed=True,
         populate_by_name=True
     )
+
+    _campo_leyenda: ClassVar[str] = "N_COBERT"
 
     # === BLOQUE 1: INFORMACIÓN ADMINISTRATIVA ===
     EXPEDIENTE: Optional[str] = Field(None, max_length=20)
@@ -397,6 +379,8 @@ class TransectoMuestreoFauna(BaseEV_Geo):
         validate_assignment=True,
         populate_by_name=True
     )
+
+    _campo_leyenda: ClassVar[str] = "N_COBERT"
 
     # === IDENTIFICACIÓN ===
     EXPEDIENTE: Optional[str] = Field(None, max_length=20)

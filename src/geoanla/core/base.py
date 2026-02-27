@@ -1,17 +1,59 @@
 import polars as pl
 import pandas as pd
 import geopandas as gpd
-from pydantic import BaseModel, ValidationError, ConfigDict, Field
+from pydantic import BaseModel, ValidationError, ConfigDict, Field, model_validator
 from typing import Optional, List, Dict, Any, Union, ClassVar, get_type_hints, get_origin, get_args, Annotated
 from enum import Enum
 import types
+from geoanla.catalog import (
+    Dom_CateCober, Dom_SubcatCober, Dom_Clas_Cober,
+    Dom_Subclas_Cober, Dom_Nivel5_Cober, Dom_Nivel6_Cober
+)
 
 class BaseEV(BaseModel):
     # Aceptamos explícitamente Polars, Pandas o GeoPandas
     _data: Optional[Union[pl.DataFrame, pd.DataFrame, gpd.GeoDataFrame]] = None
     _dominios_externos: ClassVar[Dict[str, Dict[str, str]]] = {}
 
+    # --- CONFIGURACIÓN DE VALIDACIÓN DE LEYENDA CLC ---
+    # Subclases deben sobreescribir _campo_leyenda con el nombre del campo que contiene
+    # la leyenda (ej: "N_COBERT" o "OBSERV"). Si es None, la validación se omite.
+    _campo_leyenda: ClassVar[Optional[str]] = None
+
+    _catalogo_descripciones: ClassVar[dict] = {
+        int(item.value): item.descripcion
+        for dom in [
+            Dom_CateCober, Dom_SubcatCober, Dom_Clas_Cober,
+            Dom_Subclas_Cober, Dom_Nivel5_Cober, Dom_Nivel6_Cober
+        ]
+        for item in dom
+    }
+
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    # --- 0. VALIDACIÓN DE LEYENDA vs NOMENCLATURA (OPT-IN) ---
+    @model_validator(mode='after')
+    def validar_leyenda_nomenclatura(self):
+        """
+        Valida que la leyenda coincida EXACTAMENTE con la descripción oficial
+        del código NOMENCLAT según el catálogo Corine Land Cover.
+        Solo se activa si la subclase define _campo_leyenda.
+        """
+        campo = self.__class__._campo_leyenda
+        if campo is None:
+            return self
+
+        leyenda = getattr(self, campo, None)
+        nomenclat = getattr(self, 'NOMENCLAT', None)
+
+        if leyenda is not None and nomenclat is not None:
+            descripcion_oficial = self._catalogo_descripciones.get(nomenclat)
+            if descripcion_oficial is not None and leyenda != descripcion_oficial:
+                raise ValueError(
+                    f"La leyenda '{leyenda}' (campo {campo}) no corresponde al código "
+                    f"NOMENCLAT {nomenclat}. La descripción oficial es: '{descripcion_oficial}'"
+                )
+        return self
 
     # --- 1. MÉTODOS DE INTELIGENCIA DE DOMINIOS ---
     @classmethod

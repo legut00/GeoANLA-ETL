@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, ClassVar
 from datetime import date
 from pydantic import Field, ConfigDict, field_validator, model_validator
 from geoanla.core.base import BaseEV
@@ -93,6 +93,8 @@ class MuestreoFloraResultadosTB(BaseEV):
         validate_assignment=True,
         populate_by_name=True
     )
+
+    _campo_leyenda: ClassVar[str] = "N_COBERT"
 
     # === IDENTIFICACIÓN ===
     EXPEDIENTE: Optional[str] = Field(None, max_length=20)
