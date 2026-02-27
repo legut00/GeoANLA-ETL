@@ -202,8 +202,33 @@ class CoberturaTierra(BaseEV_Geo):
 
     # === DATOS TÉCNICOS Y GEOMETRÍA ===
     NOMENCLAT: int = Field(..., description="Código Corine Land Cover del nivel más detallado")
-    OBSERV: Optional[str] = Field(None, max_length=255)
+    OBSERV: Optional[str] = Field(None, max_length=255, description="Leyenda de la cobertura: Debe coincidir exactamente con la descripción oficial del código NOMENCLAT")
     AREA_ha: float = Field(..., ge=0.0, description="Área en hectáreas (Double 8)")
+
+    # --- SANITIZACIÓN DE DATOS ---
+
+    @field_validator('N4_COBERT', 'N5_COBERT', 'N6_COBERT', mode='before')
+    @classmethod
+    def sanitizar_nivel_cero(cls, v):
+        """
+        Convierte 0 o 0.0 a None para niveles opcionales de la jerarquía CLC.
+        En datos reales de GDB, los niveles no aplicables vienen como 0.0
+        en lugar de nulos.
+        """
+        if v is not None and float(v) == 0.0:
+            return None
+        return v
+
+    # --- CATÁLOGO DE DESCRIPCIONES OFICIALES ---
+
+    _catalogo_descripciones: ClassVar[dict] = {
+        int(item.value): item.descripcion
+        for dom in [
+            Dom_CateCober, Dom_SubcatCober, Dom_Clas_Cober,
+            Dom_Subclas_Cober, Dom_Nivel5_Cober, Dom_Nivel6_Cober
+        ]
+        for item in dom
+    }
 
     # --- VALIDACIONES LÓGICAS ---
 
@@ -212,14 +237,11 @@ class CoberturaTierra(BaseEV_Geo):
         """
         Valida que el campo NOMENCLAT coincida con el nivel más profundo reportado.
         """
-        # Lista de niveles de mayor a menor detalle
         niveles = [self.N6_COBERT, self.N5_COBERT, self.N4_COBERT, self.N3_COBERT]
-
-        # El primer valor que no sea None es el nivel máximo de detalle
         nivel_detalle = next((n for n in niveles if n is not None), None)
 
         if nivel_detalle is not None and int(nivel_detalle) != self.NOMENCLAT:
-             raise ValueError(
+            raise ValueError(
                 f"La NOMENCLAT ({self.NOMENCLAT}) debe coincidir con el nivel más detallado "
                 f"reportado ({int(nivel_detalle)})"
             )
@@ -228,8 +250,9 @@ class CoberturaTierra(BaseEV_Geo):
     @model_validator(mode='after')
     def validar_jerarquia_coherente(self):
         """
-        Opcional: Valida que el nivel superior sea el prefijo del nivel inferior.
+        Valida que cada nivel sea prefijo coherente del nivel inferior.
         Ej: Si N3 es 311, N2 debe ser 31 y N1 debe ser 3.
+        Se extiende a los niveles 4, 5 y 6 cuando están presentes.
         """
         n1 = str(int(self.N1_COBERT))
         n2 = str(int(self.N2_COBERT))
@@ -239,6 +262,37 @@ class CoberturaTierra(BaseEV_Geo):
             raise ValueError(f"El Nivel 2 ({n2}) no es coherente con el Nivel 1 ({n1})")
         if not n3.startswith(n2):
             raise ValueError(f"El Nivel 3 ({n3}) no es coherente con el Nivel 2 ({n2})")
+
+        if self.N4_COBERT is not None:
+            n4 = str(int(self.N4_COBERT))
+            if not n4.startswith(n3):
+                raise ValueError(f"El Nivel 4 ({n4}) no es coherente con el Nivel 3 ({n3})")
+
+            if self.N5_COBERT is not None:
+                n5 = str(int(self.N5_COBERT))
+                if not n5.startswith(n4):
+                    raise ValueError(f"El Nivel 5 ({n5}) no es coherente con el Nivel 4 ({n4})")
+
+                if self.N6_COBERT is not None:
+                    n6 = str(int(self.N6_COBERT))
+                    if not n6.startswith(n5):
+                        raise ValueError(f"El Nivel 6 ({n6}) no es coherente con el Nivel 5 ({n5})")
+
+        return self
+
+    @model_validator(mode='after')
+    def validar_leyenda_observ(self):
+        """
+        Valida que la leyenda en OBSERV coincida EXACTAMENTE con la descripción
+        oficial del código NOMENCLAT según el catálogo Corine Land Cover.
+        """
+        if self.OBSERV is not None:
+            descripcion_oficial = self._catalogo_descripciones.get(self.NOMENCLAT)
+            if descripcion_oficial is not None and self.OBSERV != descripcion_oficial:
+                raise ValueError(
+                    f"La leyenda '{self.OBSERV}' no corresponde al código NOMENCLAT {self.NOMENCLAT}. "
+                    f"La descripción oficial es: '{descripcion_oficial}'"
+                )
         return self
 
 # --- CLASE MAESTRA: PuntoMuestreoFauna (CON GEOMETRÍA) ---
