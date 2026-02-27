@@ -94,7 +94,7 @@ class MuestreoFloraResultadosTB(BaseEV):
         populate_by_name=True
     )
 
-    _campo_leyenda: ClassVar[str] = "N_COBERT"
+    CAMPO_LEYENDA = "N_COBERT"
 
     # === IDENTIFICACIÓN ===
     EXPEDIENTE: Optional[str] = Field(None, max_length=20)

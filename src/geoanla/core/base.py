@@ -10,24 +10,24 @@ from geoanla.catalog import (
     Dom_Subclas_Cober, Dom_Nivel5_Cober, Dom_Nivel6_Cober
 )
 
+# === CATÁLOGO OFICIAL CLC (Nivel de módulo, fuera de Pydantic) ===
+CATALOGO_CLC = {
+    int(item.value): item.descripcion
+    for dom in [
+        Dom_CateCober, Dom_SubcatCober, Dom_Clas_Cober,
+        Dom_Subclas_Cober, Dom_Nivel5_Cober, Dom_Nivel6_Cober
+    ]
+    for item in dom
+}
+
 class BaseEV(BaseModel):
     # Aceptamos explícitamente Polars, Pandas o GeoPandas
     _data: Optional[Union[pl.DataFrame, pd.DataFrame, gpd.GeoDataFrame]] = None
     _dominios_externos: ClassVar[Dict[str, Dict[str, str]]] = {}
 
-    # --- CONFIGURACIÓN DE VALIDACIÓN DE LEYENDA CLC ---
-    # Subclases deben sobreescribir _campo_leyenda con el nombre del campo que contiene
-    # la leyenda (ej: "N_COBERT" o "OBSERV"). Si es None, la validación se omite.
-    _campo_leyenda: ClassVar[Optional[str]] = None
-
-    _catalogo_descripciones: ClassVar[dict] = {
-        int(item.value): item.descripcion
-        for dom in [
-            Dom_CateCober, Dom_SubcatCober, Dom_Clas_Cober,
-            Dom_Subclas_Cober, Dom_Nivel5_Cober, Dom_Nivel6_Cober
-        ]
-        for item in dom
-    }
+    # Subclases sobreescriben con "N_COBERT" o "OBSERV" para activar validación de leyenda.
+    # Sin anotación de tipo → Pydantic lo ignora completamente.
+    CAMPO_LEYENDA = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -37,9 +37,9 @@ class BaseEV(BaseModel):
         """
         Valida que la leyenda coincida EXACTAMENTE con la descripción oficial
         del código NOMENCLAT según el catálogo Corine Land Cover.
-        Solo se activa si la subclase define _campo_leyenda.
+        Solo se activa si la subclase define CAMPO_LEYENDA.
         """
-        campo = self.__class__._campo_leyenda
+        campo = self.__class__.CAMPO_LEYENDA
         if campo is None:
             return self
 
@@ -47,7 +47,7 @@ class BaseEV(BaseModel):
         nomenclat = getattr(self, 'NOMENCLAT', None)
 
         if leyenda is not None and nomenclat is not None:
-            descripcion_oficial = self._catalogo_descripciones.get(nomenclat)
+            descripcion_oficial = CATALOGO_CLC.get(nomenclat)
             if descripcion_oficial is not None and leyenda != descripcion_oficial:
                 raise ValueError(
                     f"La leyenda '{leyenda}' (campo {campo}) no corresponde al código "

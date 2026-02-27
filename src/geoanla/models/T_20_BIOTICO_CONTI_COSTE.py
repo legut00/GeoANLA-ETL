@@ -28,7 +28,7 @@ class PuntoMuestreoFlora(BaseEV_Geo): # ✅ CORREGIDO: Hereda de BaseEV_Geo
         populate_by_name=True
     )
 
-    _campo_leyenda: ClassVar[str] = "N_COBERT"
+    CAMPO_LEYENDA = "N_COBERT"
 
     # === INFORMACIÓN ADMINISTRATIVA ===
     EXPEDIENTE: Optional[str] = Field(None, max_length=20)
@@ -112,7 +112,7 @@ class PuntoMuestreoVeda(BaseEV_Geo): # Hereda de BaseEV_Geo para soporte de geom
         populate_by_name=True  # Permite usar el nombre del campo o el alias de la GDB
     )
 
-    _campo_leyenda: ClassVar[str] = "N_COBERT"
+    CAMPO_LEYENDA = "N_COBERT"
 
     # === BLOQUE 1: INFORMACIÓN ADMINISTRATIVA ===
     EXPEDIENTE: Optional[str] = Field(None, max_length=20)
@@ -188,7 +188,7 @@ class CoberturaTierra(BaseEV_Geo):
         populate_by_name=True
     )
 
-    _campo_leyenda: ClassVar[str] = "OBSERV"
+    CAMPO_LEYENDA = "OBSERV"
 
     # === IDENTIFICACIÓN ===
     EXPEDIENTE: Optional[str] = Field(None, max_length=20, description="Número de expediente ANLA")
@@ -285,7 +285,7 @@ class PuntoMuestreoFauna(BaseEV_Geo):
         populate_by_name=True
     )
 
-    _campo_leyenda: ClassVar[str] = "N_COBERT"
+    CAMPO_LEYENDA = "N_COBERT"
 
     # === BLOQUE 1: INFORMACIÓN ADMINISTRATIVA ===
     EXPEDIENTE: Optional[str] = Field(None, max_length=20)
@@ -380,7 +380,7 @@ class TransectoMuestreoFauna(BaseEV_Geo):
         populate_by_name=True
     )
 
-    _campo_leyenda: ClassVar[str] = "N_COBERT"
+    CAMPO_LEYENDA = "N_COBERT"
 
     # === IDENTIFICACIÓN ===
     EXPEDIENTE: Optional[str] = Field(None, max_length=20)
