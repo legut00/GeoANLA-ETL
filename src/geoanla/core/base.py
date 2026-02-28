@@ -169,7 +169,13 @@ class BaseEV(BaseModel):
                 objeto = cls(**datos_fila)
                 validos.append(objeto.model_dump())
             except ValidationError as e:
-                msg = "; ".join([f"[{err['loc'][0]}]: {err['msg']}" for err in e.errors()])
+                # Extraemos el mensaje de forma segura. Los errores de @model_validator no tienen 'loc'
+                mensajes = []
+                for err in e.errors():
+                    campo = err['loc'][0] if 'loc' in err and len(err['loc']) > 0 else 'Registro/Modelo'
+                    mensajes.append(f"[{campo}]: {err['msg']}")
+                
+                msg = "; ".join(mensajes)
                 errores.append({"Fila": index + offset, "ID": identificador, "Errores": msg})
 
         print("\n" + "="*50 + f"\n📊 RESULTADO FINAL - {cls.__name__}\n" + "="*50)
