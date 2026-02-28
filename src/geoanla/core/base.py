@@ -25,21 +25,23 @@ class BaseEV(BaseModel):
     _data: Optional[Union[pl.DataFrame, pd.DataFrame, gpd.GeoDataFrame]] = None
     _dominios_externos: ClassVar[Dict[str, Dict[str, str]]] = {}
 
-    # Subclases sobreescriben con "N_COBERT" o "OBSERV" para activar validación de leyenda.
-    # Sin anotación de tipo → Pydantic lo ignora completamente.
-    CAMPO_LEYENDA = None
-
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     # --- 0. VALIDACIÓN DE LEYENDA vs NOMENCLATURA (OPT-IN) ---
+
+    @classmethod
+    def get_campo_leyenda(cls) -> Optional[str]:
+        """Subclases sobreescriben para activar validación. Retorna 'N_COBERT' o 'OBSERV'."""
+        return None
+
     @model_validator(mode='after')
     def validar_leyenda_nomenclatura(self):
         """
         Valida que la leyenda coincida EXACTAMENTE con la descripción oficial
         del código NOMENCLAT según el catálogo Corine Land Cover.
-        Solo se activa si la subclase define CAMPO_LEYENDA.
+        Solo se activa si la subclase sobreescribe get_campo_leyenda().
         """
-        campo = self.__class__.CAMPO_LEYENDA
+        campo = self.__class__.get_campo_leyenda()
         if campo is None:
             return self
 
