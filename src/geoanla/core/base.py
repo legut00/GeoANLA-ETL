@@ -27,33 +27,35 @@ class BaseEV(BaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    # --- 0. VALIDACIÓN DE LEYENDA vs NOMENCLATURA (OPT-IN) ---
-
-    @classmethod
-    def get_campo_leyenda(cls) -> Optional[str]:
-        """Subclases sobreescriben para activar validación. Retorna 'N_COBERT' o 'OBSERV'."""
-        return None
+    # --- 0. VALIDACIÓN DE LEYENDA vs NOMENCLATURA (UNIVERSAL) ---
 
     @model_validator(mode='after')
     def validar_leyenda_nomenclatura(self):
         """
-        Valida que la leyenda coincida EXACTAMENTE con la descripción oficial
-        del código NOMENCLAT según el catálogo Corine Land Cover.
-        Solo se activa si la subclase sobreescribe get_campo_leyenda().
+        Validador Universal: Compara código NOMENCLAT vs texto descriptivo 
+        dinámicamente dependiendo de lo que declare CAMPO_LEYENDA en la subclase.
         """
-        campo = self.__class__.get_campo_leyenda()
-        if campo is None:
+        # 1. Obtenemos el nombre de la columna que tiene el texto
+        campo_texto = getattr(self.__class__, 'CAMPO_LEYENDA', None)
+        
+        # Si la clase no definió CAMPO_LEYENDA o no tiene NOMENCLAT, no hacemos nada
+        if not campo_texto or not hasattr(self, 'NOMENCLAT'):
             return self
 
-        leyenda = getattr(self, campo, None)
-        nomenclat = getattr(self, 'NOMENCLAT', None)
+        # 2. Extraemos los valores de la fila actual
+        texto_ingresado = getattr(self, campo_texto, None)
+        codigo_nomenclat = self.NOMENCLAT
 
-        if leyenda is not None and nomenclat is not None:
-            descripcion_oficial = CATALOGO_CLC.get(nomenclat)
-            if descripcion_oficial is not None and leyenda != descripcion_oficial:
+        # 3. Validamos contra el catálogo maestro
+        if texto_ingresado is not None and codigo_nomenclat is not None:
+            descripcion_oficial = CATALOGO_CLC.get(codigo_nomenclat)
+            
+            # Limpiamos strings (minúsculas, sin espacios extra) para hacer una comparación fuerte
+            if descripcion_oficial and texto_ingresado.strip().lower() != descripcion_oficial.lower():
                 raise ValueError(
-                    f"La leyenda '{leyenda}' (campo {campo}) no corresponde al código "
-                    f"NOMENCLAT {nomenclat}. La descripción oficial es: '{descripcion_oficial}'"
+                    f"Inconsistencia CLC: El código NOMENCLAT '{codigo_nomenclat}' "
+                    f"exige el texto exacto '{descripcion_oficial}', "
+                    f"pero en la columna '{campo_texto}' se reportó '{texto_ingresado}'."
                 )
         return self
 
