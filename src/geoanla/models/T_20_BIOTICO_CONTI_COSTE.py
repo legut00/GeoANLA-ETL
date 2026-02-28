@@ -2,7 +2,7 @@ from datetime import date
 from typing import Optional, ClassVar, Set, Any
 from pydantic import Field, ConfigDict, field_validator, model_validator
 from shapely.geometry import Point
-from geoanla.core.base import BaseEV_Geo
+from geoanla.core.base import BaseEV, BaseEV_Geo
 from geoanla.catalog import (
     Dom_Municipio, 
     Dom_Departamento, 
