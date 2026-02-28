@@ -1,5 +1,5 @@
 from typing import Optional, ClassVar
-from datetime import date
+from datetime import date, datetime
 from pydantic import Field, ConfigDict, field_validator, model_validator
 from geoanla.core.base import BaseEV
 from geoanla.catalog import (
@@ -14,7 +14,13 @@ from geoanla.catalog import (
     Dom_Regeneracion,
     Dom_Tipo_Actadmin,
     Dom_EstInver,
-    Dom_ModInterv
+    Dom_ModInterv,
+    Dom_Tipo_Migra,
+    Dom_Uso_Fauna,
+    Dom_Dieta,
+    Dom_Boolean,
+    Dom_FC_Multimedia,
+    Dom_Deter
 )
 import math
 
@@ -492,4 +498,208 @@ class Seg_EspSembradaTB(BaseEV):
         if self.FEC_MANT and self.FECHA_SIEM:
             if self.FEC_MANT < self.FECHA_SIEM:
                 raise ValueError(f"Cronología: La fecha del último mantenimiento ({self.FEC_MANT}) no puede ser anterior a la siembra ({self.FECHA_SIEM}).")
+        return self
+
+class MuestreoFaunaResultadosTB(BaseEV):
+    """
+    Tabla de Muestreo de Fauna - Resultados.
+    Relaciona y detalla las especies encontradas en el muestreo de fauna a nivel de taxonomía y coberturas.
+    """
+    model_config = ConfigDict(
+        use_enum_values=True,
+        validate_assignment=True,
+        populate_by_name=True
+    )
+
+    CAMPO_LEYENDA: ClassVar[str] = "N_COBERT"
+
+    # === BLOQUE 1: IDENTIFICACIÓN ===
+    EXPEDIENTE: Optional[str] = Field(None, max_length=20)
+    PROYECTO: str = Field(..., max_length=200)
+
+    # === BLOQUE 2: LOCALIZACIÓN Y COBERTURA ===
+    N_COBERT: str = Field(..., max_length=100)
+    NOMENCLAT: int = Field(...)
+
+    # === BLOQUE 3: TAXONOMÍA ===
+    DIVISION: str = Field(..., max_length=50)
+    CLASE: str = Field(..., max_length=50)
+    ORDEN: str = Field(..., max_length=50)
+    FAMILIA: str = Field(..., max_length=50)
+    GENERO: str = Field(..., max_length=50)
+    ESPECIE: str = Field(..., max_length=50)
+    N_COMUN: str = Field(..., max_length=50)
+
+    # === BLOQUE 4: ESTADO DE CONSERVACIÓN Y DISTRIBUCIÓN ===
+    CATEG_CIT: 'Dom_Apendice' = Field(...)
+    CATEG_UICN: 'Dom_Amenaza' = Field(...)
+    CATE_MINIS: 'Dom_Amenaza' = Field(...)
+    T_DISTRIB: 'Dom_Tipo_Distribu' = Field(...)
+    MIGRACION: 'Dom_Boolean' = Field(...)
+    TIPO_MIGR: Optional['Dom_Tipo_Migra'] = Field(None)
+
+    # === BLOQUE 5: VEDAS ===
+    VEDA: Optional['Dom_Veda'] = Field(None)
+    RESOLUCION: Optional[str] = Field(None, max_length=20)
+    ENTID_VEDA: Optional['Dom_EntidadVeda'] = Field(None)
+    VIGEN_VEDA: Optional['Dom_Vigencia'] = Field(None)
+
+    # === BLOQUE 6: ABUNDANCIA Y ECOLOGÍA ===
+    ABUND_ABS: float = Field(..., ge=0.0)
+    ABUND_REL: float = Field(..., ge=0.0, le=100.0)
+    USO: 'Dom_Uso_Fauna' = Field(...)
+    DIETA: 'Dom_Dieta' = Field(...)
+    DISTR_ALT: str = Field(..., max_length=20)
+
+    # === BLOQUE 7: TEMPORALIDAD Y OBSERVACIONES ===
+    FECHA_IMUE: date = Field(...)
+    FECHA_FMUE: date = Field(...)
+    OBSERV: Optional[str] = Field(None, max_length=255)
+
+    # ==========================================
+    # VALIDACIONES DE CAMPO (FIELD VALIDATORS)
+    # ==========================================
+
+    @field_validator('ABUND_ABS', 'ABUND_REL', mode='before')
+    @classmethod
+    def validar_estructura_y_limpieza(cls, v):
+        """Bloquea nulos/NaNs y garantiza el casteo a float con precisión."""
+        if v is None or (isinstance(v, float) and math.isnan(v)):
+            raise ValueError("El campo de abundancia es obligatorio y no puede estar vacío (NaN/Null)")
+        return round(float(v), 8)
+
+    # ==========================================
+    # VALIDACIONES LÓGICAS (MODEL VALIDATORS)
+    # ==========================================
+
+    @model_validator(mode='after')
+    def validar_fechas(self) -> 'MuestreoFaunaResultadosTB':
+        """Asegura la coherencia temporal de los muestreos."""
+        if self.FECHA_IMUE and self.FECHA_FMUE:
+            if self.FECHA_IMUE > self.FECHA_FMUE:
+                raise ValueError(f"Cronología: La Fecha Inicio ({self.FECHA_IMUE}) no puede ser posterior a la Fecha Fin ({self.FECHA_FMUE})")
+        return self
+
+    @model_validator(mode='after')
+    def validar_condicional_veda(self) -> 'MuestreoFaunaResultadosTB':
+        """
+        Si VEDA tiene un código asignado, los campos relacionados
+        pasan de ser opcionales a obligatorios.
+        """
+        if self.VEDA is not None:
+            errores = []
+            if not self.RESOLUCION: errores.append("RESOLUCION")
+            if self.ENTID_VEDA is None: errores.append("ENTID_VEDA")
+            if self.VIGEN_VEDA is None: errores.append("VIGEN_VEDA")
+
+            if errores:
+                raise ValueError(f"Fallo de integridad: Si la especie tiene VEDA, los campos {', '.join(errores)} son obligatorios.")
+        return self
+
+    @model_validator(mode='after')
+    def validar_condicional_migracion(self) -> 'MuestreoFaunaResultadosTB':
+        """
+        Garantiza que si la especie es migratoria, se especifique el tipo de migración.
+        (Dependiendo de tu Enum Dom_Boolean, ajusta el valor True o 1 si es necesario).
+        """
+        # Suponiendo que el valor afirmativo en Dom_Boolean es 1.0 o True
+        if self.MIGRACION == 1.0 or self.MIGRACION is True:
+            if self.TIPO_MIGR is None:
+                raise ValueError("Inconsistencia: Si 'MIGRACION' es afirmativa, debe diligenciar el campo 'TIPO_MIGR'.")
+        return self
+
+class RegistrosMultimediaTB(BaseEV):
+    """
+    Tabla: RegistrosMultimediaTB
+    Descripción: Relaciona la ubicación y características de los registros multimedia
+    asociados a los elementos de las diferentes capas temáticas.
+    """
+    model_config = ConfigDict(
+        use_enum_values=True,
+        validate_assignment=True,
+        populate_by_name=True
+    )
+
+    # === BLOQUE 1: IDENTIFICACIÓN ===
+    EXPEDIENTE: Optional[str] = Field(None, max_length=20, description="Número de expediente asignado por la ANLA")
+    # Este identificador debe coincidir con el ID del feature class correspondiente
+    ID_REG_MUL: str = Field(..., max_length=20, description="Identificador del elemento al cual pertenece el registro multimedia")
+
+    # === BLOQUE 2: ASOCIACIÓN GEOGRÁFICA ===
+    FEAT_CLASS: Dom_FC_Multimedia = Field(..., description="Feature class o capa geográfica asociada (Double 8)")
+
+    # === BLOQUE 3: ARCHIVO Y TEMPORALIDAD ===
+    UBIC_ARCHI: str = Field(..., max_length=255, description="Ruta relativa hasta el nombre o identificación del archivo")
+    FEC_TOMA: date = Field(..., description="Fecha a la que corresponde el registro multimedia (Date 8)")
+
+    # === BLOQUE 4: NOTAS ===
+    OBSERV: Optional[str] = Field(None, max_length=255, description="Observaciones pertinentes para el elemento")
+
+    # --- VALIDACIONES DE CAMPO ---
+
+    @field_validator('FEC_TOMA', mode='before')
+    @classmethod
+    def normalizar_fecha_toma(cls, v):
+        """
+        Asegura que la fecha no contenga horas (Double 8),
+        especialmente útil cuando se carga desde Pandas.
+        """
+        if isinstance(v, datetime):
+            return v.date()
+        return v
+
+
+class MuestreoFaunaTB(BaseEV):
+    model_config = ConfigDict(
+        use_enum_values=True,
+        validate_assignment=True,
+        populate_by_name=True
+    )
+
+    # === IDENTIFICACIÓN ===
+    EXPEDIENTE: Optional[str] = Field(None, max_length=20)
+
+    # RELACIÓN ESPACIAL (Condicionales: Debe existir al menos uno)
+    ID_MUES_PT: Optional[str] = Field(None, max_length=20, description="ID del Punto (si aplica)")
+    ID_MUES_TR: Optional[str] = Field(None, max_length=20, description="ID del Transecto (si aplica)")
+
+    # === DETALLES DEL REGISTRO ===
+    DETERM: Dom_Deter = Field(..., description="411:Captura, 413:Vista, 415:Oido...")
+    OT_DETERM: Optional[str] = Field(None, max_length=50, description="Obligatorio si DETERM es Otro")
+
+    # === TAXONOMÍA (Obligatoria) ===
+    DIVISION: str = Field(..., max_length=50)
+    CLASE: str = Field(..., max_length=50)
+    ORDEN: str = Field(..., max_length=50)
+    FAMILIA: str = Field(..., max_length=50)
+    GENERO: str = Field(..., max_length=50)
+    ESPECIE: str = Field(..., max_length=50)
+    N_COMUN: str = Field(..., max_length=50)
+
+    # === CANTIDAD ===
+    # Aunque son individuos (enteros), ANLA pide Double (float).
+    ABUND_ABS: float = Field(..., ge=0, description="Número de individuos registrados")
+
+    # === OTROS ===
+    OBSERV: Optional[str] = Field(None, max_length=255)
+
+    # --- VALIDACIONES DE NEGOCIO ---
+
+    @model_validator(mode='after')
+    def validar_origen_registro(self):
+        """Valida que el registro esté asociado a un Punto O a un Transecto."""
+        pt = getattr(self, 'ID_MUES_PT', None)
+        tr = getattr(self, 'ID_MUES_TR', None)
+
+        # Verificar si ambos son Nulos/Vacíos
+        if not pt and not tr:
+            raise ValueError("El registro debe estar asociado a un Punto (ID_MUES_PT) o a un Transecto (ID_MUES_TR). Ambos no pueden ser nulos.")
+        return self
+
+    @model_validator(mode='after')
+    def validar_otro_determinacion(self):
+        """Si DETERM es 419 (Otro), OT_DETERM es obligatorio."""
+        # 419 es el código asumiendo que es "Otro", según el contexto.
+        if self.DETERM == 419.0 and not self.OT_DETERM:
+            raise ValueError("Seleccionó 'Otro' en DETERM, debe especificar en OT_DETERM.")
         return self
