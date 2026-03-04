@@ -1,0 +1,27 @@
+[package]
+name = "rust_tunnel"
+version = "0.1.0"
+edition = "2021"
+description = "Microservicio local ultrarrápido para validación y consultas espaciales/taxonómicas usando DuckDB."
+
+[dependencies]
+# Servidor web ultra-rápido basado en Tokio
+axum = "0.7.4"
+
+# Runtime asíncrono para concurrencia masiva
+tokio = { version = "1.35.1", features = ["full"] }
+
+# Serialización y deserialización de JSON (esencial para Pydantic/Python)
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.111"
+
+# DuckDB integrado (bundled) para evitar dependencias externas en C y facilitar la instalación
+duckdb = { version = "1.1.1", features = ["bundled"] }
+
+# Pool de conexiones (Crucial para mantener DuckDB abierto y atender múltiples requests)
+r2d2 = "0.8.10"
+r2d2-duckdb = "0.2.1"
+
+# Extra: Manejo de logs simple para saber si el servidor levantó
+tracing = "0.1.40"
+tracing-subscriber = "0.3.18"
