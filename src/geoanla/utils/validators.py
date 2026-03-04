@@ -50,7 +50,7 @@ def validate_gdb_layer(
 
     # Extraction and validation
     test = model_class.extract(layer_gdb)
-    errores, registros = model_class.validate_data()
+    registros, errores = model_class.validate_data()
 
     print("✅ Completed.\n")
     return errores, registros, layer_gdb
