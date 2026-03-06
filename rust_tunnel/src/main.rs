@@ -1,3 +1,5 @@
+use std::net::SocketAddr;
+
 use axum::{
     extract::{Query, State},
     http::StatusCode,
@@ -5,103 +7,107 @@ use axum::{
     routing::get,
     Json, Router,
 };
+use duckdb::DuckdbConnectionManager;
 use r2d2::Pool;
-use r2d2_duckdb::DuckdbConnectionManager;
 use serde::{Deserialize, Serialize};
-use std::net::SocketAddr;
-use tracing_subscriber;
 
-// === 1. Tipos Compartidos (Estado y Conexiones) ===
-// Mantenemos un pool de conexiones a DuckDB vivo para no abrir el origen por cada Request
+/// === 1. Tipos Compartidos (Estado y Conexiones) ===
+/// Mantenemos un pool de conexiones a DuckDB vivo para evitar la sobrecarga de apertura.
 type DbPool = Pool<DuckdbConnectionManager>;
 
-// === 2. Modelos Pydantic <-> Rust (Serde) ===
-// Lo que Python (Pydantic) nos preguntará: GET /api/taxon?genero=Tapirus&especie=terrestris
+/// === 2. Modelos de Datos (Serde) ===
+/// Estructura para capturar los parámetros de búsqueda de taxonomía.
 #[derive(Deserialize)]
 struct TaxonQuery {
-    genero: String,
-    especie: String,
+    /// Género taxonómico (ej. Tapirus)
+    genus: String,
+    /// Especie taxonómica (ej. terrestris)
+    species: String,
 }
 
-// Lo que Rust le devolverá a Python: JSON limpio
+/// Respuesta estructurada para el cliente (Python/Pydantic).
 #[derive(Serialize)]
 struct TaxonResponse {
-    genero: String,
-    especie: String,
-    es_valido: bool,
-    status_uicn: Option<String>,
+    genus: String,
+    species: String,
+    is_valid: bool,
+    uicn_status: Option<String>,
 }
 
-// === 3. Rutas (Handlers) ===
-// Endpoint de prueba rápida para que Python sepa si el servidor levantó
+/// === 3. Controladores (Handlers) ===
+/// Endpoint básico para verificar la disponibilidad del microservicio.
 async fn health_check() -> &'static str {
-    "El Túnel de Datos de GeoANLA-ETL en Rust está vivo y respirando."
+    "El Túnel de Datos de GeoANLA-ETL en Rust está activo."
 }
 
-// El Endpoint pesado: la consulta que reemplazaría la petición de red
+/// Procesa consultas taxonómicas de alto rendimiento.
 async fn check_taxon(
     State(pool): State<DbPool>,
     Query(params): Query<TaxonQuery>,
 ) -> impl IntoResponse {
-    // 3.1 Tomamos una conexión libre del Pool
-    let conn = match pool.get() {
+    // 3.1 Adquisición de conexión desde el Pool
+    let _conn = match pool.get() {
         Ok(c) => c,
         Err(e) => {
-            tracing::error!("Error obteniendo conexión a DuckDB: {}", e);
-            return (StatusCode::INTERNAL_SERVER_ERROR, Json(serde_json::json!({"error": "DB_POOL_ERROR"}))).into_response();
+            tracing::error!("Error de conexión al pool de DuckDB: {}", e);
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({"error": "DB_POOL_ERROR"})),
+            )
+                .into_response();
         }
     };
 
-    // 3.2 Hacemos la consulta a Parquet ultra rápida (esto es un ejemplo simulado)
-    // En el futuro cambiarás esto por la query real a tu parquet de GBIF/SiB.
-    let genero_buscado = params.genero.to_lowercase();
-    let especie_buscada = params.especie.to_lowercase();
+    // 3.2 Lógica de validación optimizada (sin asignaciones innecesarias de String)
+    let is_tapir = params.genus.eq_ignore_ascii_case("tapirus") 
+        && params.species.eq_ignore_ascii_case("terrestris");
 
-    // Solo como demostración: simulamos que encontramos un Tapir
-    let es_valido = genero_buscado == "tapirus" && especie_buscada == "terrestris";
-    let status_uicn = if es_valido {
+    let uicn_status = if is_tapir {
         Some("Vulnerable (VU)".to_string())
     } else {
         None
     };
 
-    let respuesta = TaxonResponse {
-        genero: params.genero,
-        especie: params.especie,
-        es_valido,
-        status_uicn,
+    let response = TaxonResponse {
+        genus: params.genus,
+        species: params.species,
+        is_valid: is_tapir,
+        uicn_status,
     };
 
-    // 3.3 Devolvemos un OK (200) con el JSON puro hacia Python
-    (StatusCode::OK, Json(respuesta)).into_response()
+    // 3.3 Respuesta en formato JSON
+    (StatusCode::OK, Json(response)).into_response()
 }
 
-
-// === 4. Punto de Entrada (Main) ===
+/// === 4. Inicialización del Servidor (Main) ===
 #[tokio::main]
-async fn main() {
-    // Inicializar logs coloridos
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Configuración de telemetría y logs
     tracing_subscriber::fmt::init();
-    tracing::info!("Iniciando motor de DuckDB en memoria...");
+    tracing::info!("Iniciando motor analítico DuckDB...");
 
-    // 4.1 Configurar el motor analítico DuckDB
-    // Por ahora en memoria. Luego puedes usar "./data/db_completa.duckdb" o simplemente leer parquets en memoria
-    let manager = DuckdbConnectionManager::memory().unwrap();
+    // 4.1 Inicialización del Pool de Conexiones
+    let manager = DuckdbConnectionManager::memory()?;
     let pool = Pool::builder()
-        .max_size(15) // Maneja 15 hilos concurrentes de Python consultando la DB sin sudar
+        .max_size(15) // Soporta alta concurrencia para procesos ETL
         .build(manager)
-        .expect("Revisa tu entorno, no se pudo crear el Pool de conexiones a DuckDB.");
+        .map_err(|e| {
+            tracing::error!("Fallo crítico al inicializar el pool: {}", e);
+            e
+        })?;
 
-    // 4.2 Armar el enrutador de Axum y compartirle el Pool (Estado) a las rutas
+    // 4.2 Definición de rutas y estado compartido
     let app = Router::new()
         .route("/health", get(health_check))
         .route("/api/taxon", get(check_taxon))
         .with_state(pool);
 
-    // 4.3 Abrir el puerto y arrancar el servidor asíncrono
+    // 4.3 Configuración y arranque del servidor
     let addr = SocketAddr::from(([127, 0, 0, 1], 8000));
-    tracing::info!("🚀 ¡Túnel de Datos listo! Escuchando peticiones en HTTP://{}", addr);
-    
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    axum::serve(listener, app).await.unwrap();
+    tracing::info!("🚀 Servidor Rust listo en: http://{}", addr);
+
+    let listener = tokio::net::TcpListener::bind(addr).await?;
+    axum::serve(listener, app).await?;
+
+    Ok(())
 }

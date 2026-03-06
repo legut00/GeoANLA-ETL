@@ -12,7 +12,7 @@ from geoanla.catalog import (
 
 # === CATÁLOGO OFICIAL CLC (Nivel de módulo, fuera de Pydantic) ===
 CATALOGO_CLC = {
-    int(item.value): item.descripcion
+    int(item.value): item.description
     for dom in [
         Dom_CateCober, Dom_SubcatCober, Dom_Clas_Cober,
         Dom_Subclas_Cober, Dom_Nivel5_Cober, Dom_Nivel6_Cober
@@ -112,7 +112,7 @@ class BaseEV(BaseModel):
 
         texto = str(valor).strip().lower()
         for m in clase_enum:
-            if (hasattr(m, 'descripcion') and str(m.descripcion).lower() == texto) or m.name.lower() == texto:
+            if (hasattr(m, 'description') and str(m.description).lower() == texto) or m.name.lower() == texto:
                 return m.value
         return None
 
@@ -122,7 +122,7 @@ class BaseEV(BaseModel):
         doms = cls.get_domains()
         if nombre_campo in doms and isinstance(doms[nombre_campo], type):
             val = doms[nombre_campo]
-            return {m.value: (m.descripcion if hasattr(m, 'descripcion') else m.name) for m in val}
+            return {m.value: (m.description if hasattr(m, 'description') else m.name) for m in val}
         return {}
 
     # --- 2. EXTRACCIÓN SIMPLE ---

@@ -12,7 +12,7 @@ class Dom_CateCober(float, Enum):
     SUPERFICIES_DE_AGUA = 5.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             1.0: "Territorios Artificializados",
             2.0: "Territorios Agrícolas",
@@ -44,7 +44,7 @@ class Dom_SubcatCober(float, Enum):
     AGUAS_MARITIMAS = 52.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             11.0: "Zonas urbanizadas",
             12.0: "Zonas industriales o comerciales y redes de comunicación",
@@ -126,7 +126,7 @@ class Dom_Clas_Cober(float, Enum):
     ESTANQUES_ACUICULTURA_MARINA = 523.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             111.0: "Tejido urbano continuo",
             112.0: "Tejido urbano discontinuo",
@@ -278,7 +278,7 @@ class Dom_Subclas_Cober(float, Enum):
     FONDOS_SOMEROS_ARENAS_CASCAJO = 5224.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             1211.0: "Zonas industriales",
             1212.0: "Zonas comerciales",
@@ -389,7 +389,7 @@ class Dom_Nivel5_Cober(float, Enum):
     ARBUSTAL_ABIERTO_MESOFILO = 32222.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             31111.0: "Bosque denso alto de tierra firme",
             31112.0: "Bosque denso alto inundable",
@@ -425,7 +425,7 @@ class Dom_Nivel6_Cober(float, Enum):
     HELECHAL = 321124.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             311121.0: "Bosque denso alto inundable heterogéneo",
             311122.0: "Manglar denso alto",

@@ -1,28 +1,34 @@
-from typing import Optional, ClassVar
 from datetime import date, datetime
-from pydantic import Field, ConfigDict, field_validator, model_validator
-from geoanla.core.base import BaseEV
+from typing import ClassVar, Optional
+import math
+
+from pydantic import ConfigDict, Field, field_validator, model_validator
+
 from geoanla.catalog import (
-    Dom_Apendice,
     Dom_Amenaza,
-    Dom_Tipo_Distribu,
-    Dom_Veda,
+    Dom_Apendice,
+    Dom_Boolean,
+    Dom_CAR,
+    Dom_Deter,
+    Dom_Dieta,
     Dom_EntidadVeda,
-    Dom_Vigencia,
-    Dom_Uso_Flora,
-    Dom_Habito,
-    Dom_Regeneracion,
-    Dom_Tipo_Actadmin,
     Dom_EstInver,
+    Dom_FC_Multimedia,
+    Dom_Habito,
     Dom_ModInterv,
+    Dom_Otras_Comp,
+    Dom_Regeneracion,
+    Dom_SubAct_Comp,
+    Dom_Tipo_Actadmin,
+    Dom_Tipo_Distribu,
     Dom_Tipo_Migra,
     Dom_Uso_Fauna,
-    Dom_Dieta,
-    Dom_Boolean,
-    Dom_FC_Multimedia,
-    Dom_Deter
+    Dom_Uso_Flora,
+    Dom_Veda,
+    Dom_Vigencia
 )
-import math
+from geoanla.core.base import BaseEV
+
 
 class MuestreoFloraFustalTB(BaseEV):
     """
@@ -70,21 +76,21 @@ class MuestreoFloraFustalTB(BaseEV):
         'VOL_TOTAL', 'VOL_COM', 'BIOM_INDIV', 'CARB_INDIV'
     )
     @classmethod
-    def validar_metricas_fustales(cls, v):
-        """Asegura que los valores Single sean positivos, no nulos y redondeados."""
+    def validate_fustal_metrics(cls, v):
+        """Asegura que los valores sean positivos, no nulos y redondeados."""
         if v is None or (isinstance(v, float) and math.isnan(v)):
-            raise ValueError("Las variables métricas son obligatorias y no pueden ser NaN.")
-        # Redondeo a 8 decimales para precisión en GDB
+            raise ValueError("Las variables métricas no pueden ser NaN.")
         return round(float(v), 8)
 
     # --- VALIDACIONES LÓGICAS (MODEL VALIDATORS) ---
 
     @model_validator(mode='after')
-    def validar_consistencia_alturas(self):
-        """La altura comercial (H_FUSTE) no puede ser mayor a la total (H_TOTAL)."""
+    def validate_height_consistency(self):
+        """La altura comercial no puede ser mayor a la total."""
         if self.H_FUSTE > self.H_TOTAL:
             raise ValueError(
-                f"Inconsistencia en alturas: H_FUSTE ({self.H_FUSTE}) no puede superar a H_TOTAL ({self.H_TOTAL})"
+                f"Inconsistencia: H_FUSTE ({self.H_FUSTE}) > "
+                f"H_TOTAL ({self.H_TOTAL})"
             )
         return self
 
@@ -161,37 +167,39 @@ class MuestreoFloraResultadosTB(BaseEV):
 
     # --- VALIDACIONES DE CAMPO (FIELD VALIDATORS) ---
 
-    @field_validator('ABUNDANCIA', 'ABUND_REL', 'FRECUENCIA', 'FRECU_REL', 'DOMINANCIA', 'DOMIN_REL', 'IVI', mode='before')
+    @field_validator(
+        'ABUNDANCIA', 'ABUND_REL', 'FRECUENCIA', 'FRECU_REL',
+        'DOMINANCIA', 'DOMIN_REL', 'IVI', mode='before'
+    )
     @classmethod
-    def validar_estructura_y_limpieza(cls, v):
-        # 1. BLOQUEO DE NULOS Y VACÍOS:
+    def validate_structure_and_cleanup(cls, v):
+        """Bloquea nulos y garantiza precisión."""
         if v is None or (isinstance(v, float) and math.isnan(v)):
-            raise ValueError("Este campo estructural es obligatorio y no puede estar vacío (NaN/Null)")
-        # 2. GARANTÍA DE FLOAT Y PRECISIÓN (8 decimales para GDB):
+            raise ValueError("Campo estructural obligatorio no puede ser NaN.")
         return round(float(v), 8)
 
     # --- VALIDACIONES LÓGICAS (MODEL VALIDATORS) ---
 
     @model_validator(mode='after')
-    def validar_fechas(self) -> 'MuestreoFloraResultadosTB':
+    def validate_dates(self) -> 'MuestreoFloraResultadosTB':
+        """Valida que la fecha inicio no sea posterior a la fin."""
         if self.FECHA_IMUE > self.FECHA_FMUE:
-            raise ValueError(f"La Fecha Inicio ({self.FECHA_IMUE}) no puede ser posterior a la Fecha Fin ({self.FECHA_FMUE})")
+            raise ValueError("Fallo cronológico en fechas de muestreo.")
         return self
 
     @model_validator(mode='after')
-    def validar_condicional_veda(self) -> 'MuestreoFloraResultadosTB':
-        """
-        Si VEDA tiene un código asignado, los campos relacionados
-        pasan de ser opcionales a obligatorios.
-        """
+    def validate_conditional_veda(self) -> 'MuestreoFloraResultadosTB':
+        """Valida campos obligatorios si hay veda."""
         if self.VEDA is not None:
             errores = []
-            if not self.RESOLUCION: errores.append("RESOLUCION")
-            if self.ENTID_VEDA is None: errores.append("ENTID_VEDA")
-            if self.VIGEN_VEDA is None: errores.append("VIGEN_VEDA")
-
+            if not self.RESOLUCION:
+                errores.append("RESOLUCION")
+            if self.ENTID_VEDA is None:
+                errores.append("ENTID_VEDA")
+            if self.VIGEN_VEDA is None:
+                errores.append("VIGEN_VEDA")
             if errores:
-                raise ValueError(f"Si hay veda, los campos {', '.join(errores)} son obligatorios.")
+                raise ValueError(f"Campos veda requeridos: {', '.join(errores)}")
         return self
 
 class MuestreoFloraRegeneracionTB(BaseEV):
@@ -241,19 +249,18 @@ class MuestreoFloraRegeneracionTB(BaseEV):
     # --- VALIDACIONES LÓGICAS (MODEL VALIDATORS) ---
 
     @model_validator(mode='after')
-    def validar_condicional_veda_regen(self) -> 'MuestreoFloraRegeneracionTB':
-        """
-        Si VEDA tiene un código asignado, los campos relacionados
-        deben ser obligatorios según la lógica de condicionalidad.
-        """
+    def validate_conditional_veda_regeneration(self) -> 'MuestreoFloraRegeneracionTB':
+        """Valida campos de veda si aplica."""
         if self.VEDA is not None:
             errores = []
-            if not self.RESOLUCION: errores.append("RESOLUCION")
-            if self.ENTID_VEDA is None: errores.append("ENTID_VEDA")
-            if self.VIGEN_VEDA is None: errores.append("VIGEN_VEDA")
-
+            if not self.RESOLUCION:
+                errores.append("RESOLUCION")
+            if self.ENTID_VEDA is None:
+                errores.append("ENTID_VEDA")
+            if self.VIGEN_VEDA is None:
+                errores.append("VIGEN_VEDA")
             if errores:
-                raise ValueError(f"Si la especie está en VEDA, los campos {', '.join(errores)} son obligatorios.")
+                raise ValueError(f"Falta info de veda: {', '.join(errores)}")
         return self
 
 class Seg_CompensacionesTB(BaseEV):
@@ -310,37 +317,26 @@ class Seg_CompensacionesTB(BaseEV):
     # ==========================================
 
     @model_validator(mode='after')
-    def validar_relacion_compensacion(self) -> 'Seg_CompensacionesTB':
-        """
-        Regla de Integridad Relacional: La tabla debe vincularse obligatoriamente 
-        a una de las dos capas geográficas (Compensación por pérdida u Otra compensación).
-        """
+    def validate_compensation_relation(self) -> 'Seg_CompensacionesTB':
+        """Valida vínculo a capa geográfica."""
         if not self.ID_COMP and not self.ID_OT_COMP:
-            raise ValueError("Fallo de integridad: Debe diligenciarse obligatoriamente 'ID_COMP' o 'ID_OT_COMP' para establecer la relación espacial.")
+            raise ValueError("Debe vincularse a ID_COMP o ID_OT_COMP.")
         return self
 
     @model_validator(mode='after')
-    def validar_fechas_cronologicas(self) -> 'Seg_CompensacionesTB':
-        """Asegura la coherencia temporal de las fechas de la actividad y del reporte."""
-        errores = []
-        if self.FEC_INI_AC and self.FEC_TER_AC:
-            if self.FEC_TER_AC < self.FEC_INI_AC:
-                errores.append(f"Cronología Actividad: FEC_TER_AC ({self.FEC_TER_AC}) no puede ser menor a FEC_INI_AC ({self.FEC_INI_AC})")
-
-        if self.FECHA_INI and self.FECHA_FIN:
-            if self.FECHA_FIN < self.FECHA_INI:
-                errores.append(f"Cronología Reporte: FECHA_FIN ({self.FECHA_FIN}) no puede ser menor a FECHA_INI ({self.FECHA_INI})")
-
-        if errores:
-            raise ValueError(" | ".join(errores))
-
+    def validate_chronological_dates(self) -> 'Seg_CompensacionesTB':
+        """Valida coherencia temporal."""
+        if self.FEC_TER_AC < self.FEC_INI_AC:
+            raise ValueError("FEC_TER_AC no puede ser anterior a FEC_INI_AC.")
+        if self.FECHA_FIN < self.FECHA_INI:
+            raise ValueError("FECHA_FIN no puede ser anterior a FECHA_INI.")
         return self
 
     @model_validator(mode='after')
-    def validar_cumplimiento(self) -> 'Seg_CompensacionesTB':
-        """Si se reporta una fecha de acto de cumplimiento, debe existir el número del acto."""
+    def validate_compliance(self) -> 'Seg_CompensacionesTB':
+        """Valida consistencia en acto de cumplimiento."""
         if self.FE_ACT_CUM and not self.NO_ACT_CUM:
-             raise ValueError("Inconsistencia: Si se registra fecha de cumplimiento ('FE_ACT_CUM'), es obligatorio reportar el número del acto en 'NO_ACT_CUM'")
+             raise ValueError("Falta NO_ACT_CUM para la fecha de cumplimiento.")
         return self
 
 class Seg_IndicadoresTB(BaseEV):
@@ -377,38 +373,24 @@ class Seg_IndicadoresTB(BaseEV):
     # OJO: Mantenemos el error tipográfico "OBSEVACIO" tal como lo dicta el diccionario ANLA
     OBSEVACIO: Optional[str] = Field(None, max_length=255, description="Opcional")
 
-    # ==========================================
-    # VALIDACIONES LÓGICAS DE NEGOCIO
-    # ==========================================
+    # --- VALIDACIONES LÓGICAS ---
 
     @model_validator(mode='after')
-    def validar_llave_foranea(self) -> 'Seg_IndicadoresTB':
-        """
-        Garantiza que el indicador esté atado a por lo menos una inversión o compensación.
-        Si todos los ID están vacíos, es un registro huérfano.
-        """
-        ids_relacionales = [
+    def validate_foreign_key(self) -> 'Seg_IndicadoresTB':
+        """Garantiza que no sea un registro huérfano."""
+        ids = [
             self.ID_INVER, self.ID_INV_PT, self.ID_INV_PG, 
             self.ID_INV_LN, self.ID_COMP, self.ID_OT_COMP
         ]
-        
-        # Verifica si al menos uno de los IDs tiene contenido (no es None ni string vacío)
-        if not any(bool(identificador) for identificador in ids_relacionales):
-            raise ValueError(
-                "Fallo de integridad: Un indicador no puede quedar huérfano. "
-                "Debe diligenciar al menos uno de los campos de relación (ID_INVER, ID_INV_PG, ID_COMP, etc.)."
-            )
+        if not any(bool(i) for i in ids):
+            raise ValueError("El indicador debe estar atado a una inversión.")
         return self
 
     @model_validator(mode='after')
-    def validar_fechas_cronologicas(self) -> 'Seg_IndicadoresTB':
-        """Asegura la coherencia del periodo reportado."""
-        if self.FECHA_INI and self.FECHA_FIN:
-            if self.FECHA_FIN < self.FECHA_INI:
-                raise ValueError(
-                    f"Cronología de periodo inválida: FECHA_FIN ({self.FECHA_FIN}) "
-                    f"no puede ser anterior a FECHA_INI ({self.FECHA_INI})."
-                )
+    def validate_chronological_dates(self) -> 'Seg_IndicadoresTB':
+        """Asegura la coherencia del periodo."""
+        if self.FECHA_FIN < self.FECHA_INI:
+            raise ValueError("Periodo de reporte inválido.")
         return self
 
 class Seg_EspSembradaTB(BaseEV):
@@ -466,38 +448,28 @@ class Seg_EspSembradaTB(BaseEV):
     # VALIDACIONES LÓGICAS (REGLAS DE NEGOCIO)
     # ==========================================
 
+    # --- VALIDACIONES LÓGICAS ---
+
     @model_validator(mode='after')
-    def validar_llave_foranea(self) -> 'Seg_EspSembradaTB':
-        """
-        Garantiza que el registro esté atado a por lo menos una inversión o compensación,
-        tal como lo exige el diccionario de datos.
-        """
-        ids_relacionales = [
-            self.ID_COMP, self.ID_OT_COMP, self.ID_INVER, self.ID_INV_PG
-        ]
-        
-        if not any(bool(identificador) for identificador in ids_relacionales):
-            raise ValueError(
-                "Fallo de integridad: Debe diligenciar al menos uno de los campos de relación "
-                "(ID_COMP, ID_OT_COMP, ID_INVER, ID_INV_PG)."
-            )
+    def validate_foreign_key(self) -> 'Seg_EspSembradaTB':
+        """Garantiza vínculo a inversión o compensación."""
+        ids = [self.ID_COMP, self.ID_OT_COMP, self.ID_INVER, self.ID_INV_PG]
+        if not any(bool(i) for i in ids):
+            raise ValueError("Requiere vínculo a ID_COMP, ID_INVER, etc.")
         return self
 
     @model_validator(mode='after')
-    def validar_condicional_otra_estrategia(self) -> 'Seg_EspSembradaTB':
-        """Si la estrategia de intervención es 'Otra estrategia', se debe especificar cuál."""
-        # 22.0 es el código de 'Otra estrategia' según tu dominio Dom_ModInterv
-        if self.MOD_INTERV == 22.0: 
-            if not self.OT_MOD_INT:
-                raise ValueError("Inconsistencia: Si 'MOD_INTERV' es 'Otra estrategia', debe diligenciar el campo 'OT_MOD_INT'.")
+    def validate_conditional_other_strategy(self) -> 'Seg_EspSembradaTB':
+        """Valida que se especifique 'Otra estrategia'."""
+        if self.MOD_INTERV == 22.0 and not self.OT_MOD_INT:
+            raise ValueError("Debe especificar 'OT_MOD_INT'.")
         return self
 
     @model_validator(mode='after')
-    def validar_fechas_cronologicas(self) -> 'Seg_EspSembradaTB':
-        """Asegura la coherencia temporal de las fechas de siembra y mantenimiento."""
-        if self.FEC_MANT and self.FECHA_SIEM:
-            if self.FEC_MANT < self.FECHA_SIEM:
-                raise ValueError(f"Cronología: La fecha del último mantenimiento ({self.FEC_MANT}) no puede ser anterior a la siembra ({self.FECHA_SIEM}).")
+    def validate_chronological_dates(self) -> 'Seg_EspSembradaTB':
+        """Valida cronología entre siembra y mantenimiento."""
+        if self.FEC_MANT and self.FEC_MANT < self.FECHA_SIEM:
+            raise ValueError("Mantenimiento anterior a siembra.")
         return self
 
 class MuestreoFaunaResultadosTB(BaseEV):
@@ -562,8 +534,8 @@ class MuestreoFaunaResultadosTB(BaseEV):
 
     @field_validator('ABUND_ABS', 'ABUND_REL', mode='before')
     @classmethod
-    def validar_estructura_y_limpieza(cls, v):
-        """Bloquea nulos/NaNs y garantiza el casteo a float con precisión."""
+    def validate_structure_and_cleanup(cls, v):
+        """Bloquea nulos/NaNs and garantiza el casteo a float con precisión."""
         if v is None or (isinstance(v, float) and math.isnan(v)):
             raise ValueError("El campo de abundancia es obligatorio y no puede estar vacío (NaN/Null)")
         return round(float(v), 8)
@@ -573,7 +545,7 @@ class MuestreoFaunaResultadosTB(BaseEV):
     # ==========================================
 
     @model_validator(mode='after')
-    def validar_fechas(self) -> 'MuestreoFaunaResultadosTB':
+    def validate_dates(self) -> 'MuestreoFaunaResultadosTB':
         """Asegura la coherencia temporal de los muestreos."""
         if self.FECHA_IMUE and self.FECHA_FMUE:
             if self.FECHA_IMUE > self.FECHA_FMUE:
@@ -581,7 +553,7 @@ class MuestreoFaunaResultadosTB(BaseEV):
         return self
 
     @model_validator(mode='after')
-    def validar_condicional_veda(self) -> 'MuestreoFaunaResultadosTB':
+    def validate_conditional_veda(self) -> 'MuestreoFaunaResultadosTB':
         """
         Si VEDA tiene un código asignado, los campos relacionados
         pasan de ser opcionales a obligatorios.
@@ -597,10 +569,9 @@ class MuestreoFaunaResultadosTB(BaseEV):
         return self
 
     @model_validator(mode='after')
-    def validar_condicional_migracion(self) -> 'MuestreoFaunaResultadosTB':
+    def validate_conditional_migration(self) -> 'MuestreoFaunaResultadosTB':
         """
         Garantiza que si la especie es migratoria, se especifique el tipo de migración.
-        (Dependiendo de tu Enum Dom_Boolean, ajusta el valor True o 1 si es necesario).
         """
         # Suponiendo que el valor afirmativo en Dom_Boolean es 1.0 o True
         if self.MIGRACION == 1.0 or self.MIGRACION is True:
@@ -639,7 +610,7 @@ class RegistrosMultimediaTB(BaseEV):
 
     @field_validator('FEC_TOMA', mode='before')
     @classmethod
-    def normalizar_fecha_toma(cls, v):
+    def normalize_catch_date(cls, v):
         """
         Asegura que la fecha no contenga horas (Double 8),
         especialmente útil cuando se carga desde Pandas.
@@ -686,7 +657,7 @@ class MuestreoFaunaTB(BaseEV):
     # --- VALIDACIONES DE NEGOCIO ---
 
     @model_validator(mode='after')
-    def validar_origen_registro(self):
+    def validate_record_origin(self):
         """Valida que el registro esté asociado a un Punto O a un Transecto."""
         pt = getattr(self, 'ID_MUES_PT', None)
         tr = getattr(self, 'ID_MUES_TR', None)
@@ -697,7 +668,7 @@ class MuestreoFaunaTB(BaseEV):
         return self
 
     @model_validator(mode='after')
-    def validar_otro_determinacion(self):
+    def validate_other_determination(self):
         """Si DETERM es 419 (Otro), OT_DETERM es obligatorio."""
         # 419 es el código asumiendo que es "Otro", según el contexto.
         if self.DETERM == 419.0 and not self.OT_DETERM:

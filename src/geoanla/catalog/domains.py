@@ -22,7 +22,7 @@ class Dom_FC_Multimedia(float, Enum):
     APROVECHA_FORESTAL_PT = 2007.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             1107.0: "MaterialesConstruccionPT",
             1108.0: "MaterialesConstruccionPG",
@@ -82,7 +82,7 @@ class Dom_Departamento(str, Enum):
     VICHADA = "99"
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             "91": "Amazonas",
             "05": "Antioquia",
@@ -135,7 +135,7 @@ class Dom_Tenencia(float, Enum):
     USUFRUCTO_O_APARCERO = 7.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             1.0: "Propiedad privada",
             2.0: "Propiedad colectiva",
@@ -157,7 +157,7 @@ class Dom_TipoMuestreoFlo(float, Enum):
     TRANSECTO = 313.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             311.0: "Puntual",
             312.0: "Parcela",
@@ -176,7 +176,7 @@ class Dom_Temporada(float, Enum):
     TODO_EL_ANNIO = 304.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             301.0: "Seco",
             302.0: "Húmedo",
@@ -197,7 +197,7 @@ class Dom_Apendice(float, Enum):
     NO_APLICA = 400.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             100.0: "Apendice I",
             200.0: "Apendice II",
@@ -223,7 +223,7 @@ class Dom_Amenaza(float, Enum):
     NO_APLICA = 330.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             321.0: "Preocupación Menor (LC)",
             322.0: "Casi Amenazada (NT)",
@@ -249,7 +249,7 @@ class Dom_Tipo_Distribu(float, Enum):
     ENDEMICA = 334.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             331.0: "Cosmopolita",
             332.0: "Restringida",
@@ -320,7 +320,7 @@ class Dom_EntidadVeda(float, Enum):
     OTRA = 2046.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             2081.0: "AMVA - Área Metropolitana del Valle de Aburrá – Medellín",
             2047.0: "CAM - Corporación Autónoma Regional del Alto Magdalena",
@@ -381,7 +381,7 @@ class Dom_Vigencia(float, Enum):
     INDEFINIDA = 2031.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             2030.0: "Temporal",
             2031.0: "Indefinida"
@@ -402,7 +402,7 @@ class Dom_Uso_Flora(float, Enum):
     OTRO = 362.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             351.0: "Actividades Productivas",
             353.0: "Aseo",
@@ -432,7 +432,7 @@ class Dom_Habito(float, Enum):
     OTRO = 380.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             371.0: "Arbol",
             372.0: "Arbusto",
@@ -456,7 +456,7 @@ class Dom_Veda(float, Enum):
     REGIONAL = 342.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             341.0: "Nacional",
             342.0: "Regional"
@@ -473,7 +473,7 @@ class Dom_TipoTransecto(int, Enum):
     OTRO = 503
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             501: "Ancho fijo",
             502: "Ancho variable",
@@ -497,7 +497,7 @@ class Dom_Tipo_Migra(int, Enum):
     ALTITUDINAL = 110
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             101: "Intrageneracional",
             102: "Intergeneracional",
@@ -521,7 +521,7 @@ class Dom_Uso_Fauna(int, Enum):
     OTRO = 305
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             301: "Actividades Productivas",
             302: "Mascotas",
@@ -544,7 +544,7 @@ class Dom_Dieta(int, Enum):
     OTRO = 406
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             401: "Frugívoro",  # Con tilde
             402: "Herbívoro",  # Con tilde
@@ -568,7 +568,7 @@ class Dom_Sector(float, Enum):
     OTRO = 6.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             1.0: "Energía",
             2.0: "Infraestructura",
@@ -590,7 +590,7 @@ class Dom_TipoTransecto(int, Enum):
     OTRO = 503
 
     @property
-    def descripcion(self):
+    def description(self):
         """Devuelve la descripción textual del código."""
         descripciones = {
             501: "Ancho fijo",
@@ -608,7 +608,7 @@ class Dom_Boolean(float, Enum):
     NO = 2.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             1.0: "Sí",
             2.0: "No"
@@ -626,7 +626,7 @@ class Dom_TipoMuestreoFau(float, Enum):
     PARCELA = 412.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             411.0: "Puntual",
             412.0: "Parcela"
@@ -648,7 +648,7 @@ class Dom_Deter(float, Enum):
     OTRO = 419.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             411.0: "Captura de individuos",
             413.0: "Observación",
@@ -672,7 +672,7 @@ class Dom_Regeneracion(int, Enum):
     LATIZAL = 3
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             1: "Renuevo o plántula",
             2: "Brinzal",
@@ -729,7 +729,7 @@ class Dom_CAR(float, Enum):
     SPNN = 1041.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             1001.0: "AMVA",
             1002.0: "CAM",
@@ -785,7 +785,7 @@ class Dom_Tipo_Actadmin(float, Enum):
     RESOLUCION = 2.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             1.0: "Auto",
             2.0: "Resolución"
@@ -811,7 +811,7 @@ class Dom_SubAct_Comp(float, Enum):
     OTRA = 1211.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             1201.0: "Apoyo creación nuevas áreas protegidas publicas y su plan de manejo ambiental",
             1202.0: "Crear nuevas áreas protegidas privadas y su plan de manejo ambiental",
@@ -850,7 +850,7 @@ class Dom_Otras_Comp(float, Enum):
     OTRA = 20115.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             20101.0: "Aprovechamiento forestal",
             20102.0: "Concesión de aguas",
@@ -884,7 +884,7 @@ class Dom_EstInver(float, Enum):
     MODIFICADO = 35007.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             35001.0: "Evaluación",
             35002.0: "Aprobado por ejecutar",
@@ -917,7 +917,7 @@ class Dom_ModInterv(float, Enum):
     OTRA_ESTRATEGIA = 22.0
 
     @property
-    def descripcion(self):
+    def description(self):
         descripciones = {
             10.0: "Barrera viva",
             11.0: "Agroforestal",
