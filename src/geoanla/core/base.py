@@ -117,6 +117,61 @@ class BaseEV(BaseModel):
         return None
 
     @classmethod
+    def translate_data(cls, df: Union[pl.DataFrame, pd.DataFrame, gpd.GeoDataFrame]) -> Any:
+        """
+        Traducción vectorizada de alta velocidad. Mapea valores de texto 
+        o nombres de Enum a sus códigos numéricos respectivos.
+        """
+        dominios = cls.get_domains()
+        columnas_disponibles = set(df.columns)
+        
+        # --- CASO A: POLARS (MÁXIMA VELOCIDAD EN RUST) ---
+        if isinstance(df, pl.DataFrame):
+            expresiones = []
+            for campo, clase_enum in dominios.items():
+                if campo not in columnas_disponibles or not isinstance(clase_enum, type):
+                    continue
+                
+                # 1. Detectar tipo nativo del Enum para el casting final
+                ejemplo = next(iter(clase_enum)).value
+                dtype = pl.Int64 if isinstance(ejemplo, int) else pl.Float64
+                
+                # 2. Pre-calcular mapeo solo para valores únicos presentes
+                unique_vals = df.get_column(campo).drop_nulls().unique().to_list()
+                mapping = {v: cls.get_enum_code(v, campo) for v in unique_vals}
+                
+                # 3. Construir expresión vectorizada
+                expr = (
+                    pl.col(campo)
+                    .replace_strict(mapping, default=pl.col(campo))
+                    .cast(dtype)
+                    .alias(campo)
+                )
+                expresiones.append(expr)
+            
+            return df.with_columns(expresiones) if expresiones else df
+
+        # --- CASO B: PANDAS / GEOPANDAS ---
+        else:
+            df_out = df.copy()
+            for campo, clase_enum in dominios.items():
+                if campo not in columnas_disponibles or not isinstance(clase_enum, type):
+                    continue
+                
+                unique_vals = df_out[campo].dropna().unique()
+                mapping = {v: cls.get_enum_code(v, campo) for v in unique_vals}
+                
+                # Reemplazo vectorizado en Pandas
+                df_out[campo] = df_out[campo].replace(mapping)
+                
+                # Intento de casteo a numérico si el Enum es numérico
+                ejemplo = next(iter(clase_enum)).value
+                if isinstance(ejemplo, (int, float)):
+                    df_out[campo] = pd.to_numeric(df_out[campo], errors='coerce')
+                    
+            return df_out
+
+    @classmethod
     def domain(cls, nombre_campo: str) -> Dict[Any, str]:
         if nombre_campo in cls._dominios_externos: return cls._dominios_externos[nombre_campo]
         doms = cls.get_domains()
