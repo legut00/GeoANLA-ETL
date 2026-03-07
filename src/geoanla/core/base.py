@@ -30,7 +30,7 @@ class BaseEV(BaseModel):
     # --- 0. VALIDACIÓN DE LEYENDA vs NOMENCLATURA (UNIVERSAL) ---
 
     @model_validator(mode='after')
-    def validar_leyenda_nomenclatura(self):
+    def validate_legend_nomenclature(self):
         """
         Validador Universal: Compara código NOMENCLAT vs texto descriptivo 
         dinámicamente dependiendo de lo que declare CAMPO_LEYENDA en la subclase.
@@ -61,7 +61,7 @@ class BaseEV(BaseModel):
 
     # --- 1. MÉTODOS DE INTELIGENCIA DE DOMINIOS ---
     @classmethod
-    def registrar_dominio(cls, nombre_campo: str, diccionario: Dict[Any, str]):
+    def register_domain(cls, nombre_campo: str, diccionario: Dict[Any, str]):
         cls._dominios_externos[nombre_campo] = diccionario
 
     @classmethod
@@ -90,7 +90,7 @@ class BaseEV(BaseModel):
         return dominios
 
     @classmethod
-    def obtener_codigo_enum(cls, valor: Any, referencia: Union[Any, str]) -> Optional[int]:
+    def get_enum_code(cls, valor: Any, referencia: Union[Any, str]) -> Optional[int]:
         clase_enum = None
         if isinstance(referencia, type) and issubclass(referencia, Enum):
             clase_enum = referencia
