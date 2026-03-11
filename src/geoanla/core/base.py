@@ -105,15 +105,27 @@ class BaseEV(BaseModel):
         if clase_enum is None: return None
         if valor is None or str(valor).strip().lower() in ['', 'nan', 'none', '0', '0.0']: return None
 
-        if isinstance(valor, (int, float)):
-            try:
-                if int(valor) in [m.value for m in clase_enum]: return int(valor)
-            except: pass
+        # 1. Verificar si el valor ya es el código final del Enum
+        # Intentamos casteo flotante primero por si viene de Pandas como 1.0 en vez de 1
+        try:
+            val_num = float(valor)
+            if val_num.is_integer():
+                val_int = int(val_num)
+                if val_int in [m.value for m in clase_enum]:
+                    return val_int
+        except (ValueError, TypeError):
+            pass
 
+        # Si el Enum usa valores string también validamos
+        if valor in [m.value for m in clase_enum]:
+            return valor
+
+        # 2. Si no es el código directo, buscamos por la descripción o el nombre del Enum
         texto = str(valor).strip().lower()
         for m in clase_enum:
             if (hasattr(m, 'description') and str(m.description).lower() == texto) or m.name.lower() == texto:
                 return m.value
+                
         return None
 
     @classmethod

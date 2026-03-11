@@ -61,4 +61,4 @@ pip install .
 
 ## 🤝 Contribuir
 
-¡Aceptamos aportes, Pull Requests y la apertura de Issues! Si deseas colaborar con la integración de nuevas validaciones (por ejemplo, sumando nuevas clases al modelo económico o biótico) o integrando módulos de exportación adicionales para formatos GDB, por favor lee nuestra guía de contribución.
+¡Aceptamos aportes, Pull Requests y la apertura de Issues! Si deseas colaborar con la integración de nuevas validaciones (por ejemplo, sumando nuevas clases al modelo económico o biótico) o integrando módulos de exportación adicionales para formatos GDB, por favor lee [nuestra guía de contribución](CONTRIBUTING.md).
