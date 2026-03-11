@@ -178,7 +178,10 @@ class BaseEV(BaseModel):
                 
                 # Intento de casteo a numérico si el Enum es numérico
                 ejemplo = next(iter(clase_enum)).value
-                if isinstance(ejemplo, (int, float)):
+                if isinstance(ejemplo, int):
+                    # Forzamos tipo entero que soporta Nulls en Pandas
+                    df_out[campo] = pd.to_numeric(df_out[campo], errors='coerce').astype('Int64')
+                elif isinstance(ejemplo, float):
                     df_out[campo] = pd.to_numeric(df_out[campo], errors='coerce')
                     
             return df_out
