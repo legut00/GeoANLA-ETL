@@ -1,6 +1,7 @@
 import polars as pl
 import pandas as pd
 import geopandas as gpd
+import numpy as np
 from pydantic import BaseModel, ValidationError, ConfigDict, Field, model_validator
 from typing import Optional, List, Dict, Any, Union, ClassVar, get_type_hints, get_origin, get_args, Annotated
 from enum import Enum
@@ -166,6 +167,11 @@ class BaseEV(BaseModel):
         # --- CASO B: PANDAS / GEOPANDAS ---
         else:
             df_out = df.copy()
+            
+            # Limpieza universal preventiva: Convertir NaN a None clásico de Python.
+            # Esto evita que Pandas convierta columnas enteramente a float64.
+            df_out = df_out.replace({np.nan: None})
+            
             for campo, clase_enum in dominios.items():
                 if campo not in columnas_disponibles or not isinstance(clase_enum, type):
                     continue
