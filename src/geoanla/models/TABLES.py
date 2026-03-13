@@ -674,3 +674,174 @@ class MuestreoFaunaTB(BaseEV):
         if self.DETERM == 419.0 and not self.OT_DETERM:
             raise ValueError("Seleccionó 'Otro' en DETERM, debe especificar en OT_DETERM.")
         return self
+
+class Afect_OtraCompensacionTB(BaseEV):
+    pass
+
+class AvesOFM_TB(BaseEV):
+    pass
+
+class CaracterizaSedimentoMarinoTB(BaseEV):
+    pass
+
+class CaracterizaSedimentoTB(BaseEV):
+    pass
+
+class ContFuenteDispEmisionTB(BaseEV):
+    pass
+
+class ContFuenteFijaEmisionTB(BaseEV):
+    pass
+
+class DatosContingenciasTB(BaseEV):
+    pass
+
+class DatosOceanografiaTB(BaseEV):
+    pass
+
+class EsfuerzoOFM_TB(BaseEV):
+    pass
+
+class EstSueloTB(BaseEV):
+    pass
+
+class EvalEconom_ImpInternalizTB(BaseEV):
+    pass
+
+class EvalEconom_ImpNoInternalizTB(BaseEV):
+    pass
+
+class FuentesMovilesEmisionTB(BaseEV):
+    pass
+
+class IntercepSTARD_TB(BaseEV):
+    pass
+
+class Inversion1PorCientoTB(BaseEV):
+    pass
+
+class MamiferosOFM_TB(BaseEV):
+    pass
+
+class MMA_ACV_TB(BaseEV):
+    pass
+
+class MMA_Impactos_TB(BaseEV):
+    pass
+
+class MMA_Indicadores_TB(BaseEV):
+    pass
+
+class MuestreoFaunaMarinaTB(BaseEV):
+    pass
+
+class MuestreoFisicoquimMarinoTB(BaseEV):
+    pass
+
+class MuestreoFisicoquimSubterTB(BaseEV):
+    pass
+
+class MuestreoFisicoquimSuperTB(BaseEV):
+    pass
+
+class MuestreoFloraMarinaTB(BaseEV):
+    pass
+
+class MuestreoHidrobioMarinoTB(BaseEV):
+    pass
+
+class MuestreoHidrobioTB(BaseEV):
+    pass
+
+class MuestreoSueloFisicasTB(BaseEV):
+    pass
+
+class MuestreoSueloQuimicasTB(BaseEV):
+    pass
+
+class OtraFaunaOFM_TB(BaseEV):
+    pass
+
+class ParamFisicoquimSubterTB(BaseEV):
+    pass
+
+class ParamFisicoquimSuperTB(BaseEV):
+    pass
+
+class PecesOFM_TB(BaseEV):
+    pass
+
+class PesqueroOFM_TB(BaseEV):
+    pass
+
+class RegistrosCalidadAireTB(BaseEV):
+    pass
+
+class RegistrosEstMeteorologicaTB(BaseEV):
+    pass
+
+class RegistrosRuidoAmbientalTB(BaseEV):
+    pass
+
+class RegistrosRuidoEmisionTB(BaseEV):
+    pass
+
+class Seg_ActividadesSocioeconomicoTB(BaseEV):
+    pass
+
+class Seg_CaptacionesAguaTB(BaseEV):
+    pass
+
+class Seg_CaracterizaSocioeconomicaTB(BaseEV):
+    pass
+
+class Seg_DisposicionResiduosSolidosTB(BaseEV):
+    pass
+
+class Seg_DragadoyDisposicionTB(BaseEV):
+    pass
+
+class Seg_EvaluacionEconomicaTB(BaseEV):
+    pass
+
+class Seg_IndicadoresPUEA_TB(BaseEV):
+    pass
+
+class Seg_InfraProyectoTB(BaseEV):
+    pass
+
+class Seg_Inversion1PorCientoTB(BaseEV):
+    pass
+
+class Seg_InyeccionTB(BaseEV):
+    pass
+
+class Seg_MaterialesConstruccionTB(BaseEV):
+    pass
+
+class Seg_OcupacionCauceTB(BaseEV):
+    pass
+
+class Seg_TecnologiasPUEA_TB(BaseEV):
+    pass
+
+class Seg_VertimientosTB(BaseEV):
+    pass
+
+class Seg_ZodmesTB(BaseEV):
+    pass
+
+class ServiciosEcosistemicosTB(BaseEV):
+    pass
+
+class TipoEcosistemaTB(BaseEV):
+    pass
+
+class TortugasOFM_TB(BaseEV):
+    pass
+
+class Ubic_Comp_InvTB(BaseEV):
+    pass
+
+class ValoracionEconDAA_TB(BaseEV):
+    pass
