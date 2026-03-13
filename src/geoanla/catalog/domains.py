@@ -934,3 +934,659 @@ class Dom_ModInterv(float, Enum):
             22.0: "Otra estrategia"
         }
         return descripciones.get(self.value)
+
+# ==============================================================================
+# NUEVOS DOMINIOS PENDIENTES DE DEFINICION
+# ==============================================================================
+
+class Dom_UtilizEject(Enum):
+    pass
+
+class Dom_FC_MaterConst(Enum):
+    pass
+
+class Dom_TipoApro(Enum):
+    pass
+
+class Dom_FC_InfraProyecto(Enum):
+    pass
+
+class Dom_TipoResiduos(Enum):
+    pass
+
+class Dom_Obj_Iny(Enum):
+    pass
+
+class Dom_Act_Comp(Enum):
+    pass
+
+class Dom_Clase_Suelo(Enum):
+    pass
+
+class Dom_Tipo_Cuerpo_Agua(Enum):
+    pass
+
+class Dom_Metodo_Obtencion(Enum):
+    pass
+
+class Dom_Escala(Enum):
+    pass
+
+class Dom_Periodo(Enum):
+    pass
+
+class Dom_Unidad_Medida(Enum):
+    pass
+
+class Dom_Origen_Dato(Enum):
+    pass
+
+class Dom_Tipo_Infraestructura(Enum):
+    pass
+
+class Dom_Metodo_Calculo(Enum):
+    pass
+
+class Dom_Geol_Eon(Enum):
+    pass
+
+class Dom_Geol_Era(Enum):
+    pass
+
+class Dom_Geol_Per(Enum):
+    pass
+
+class Dom_Geol_Epo(Enum):
+    pass
+
+class Dom_Geol_Eda(Enum):
+    pass
+
+class Dom_Con_UG(Enum):
+    pass
+
+class Dom_Fall_EG(Enum):
+    pass
+
+class Dom_PlieLN_EG(Enum):
+    pass
+
+class Dom_PliePT_EG(Enum):
+    pass
+
+class Dom_Dest_EG(Enum):
+    pass
+
+class Dom_Tipo_Discont(Enum):
+    pass
+
+class Dom_Persistencia(Enum):
+    pass
+
+class Dom_Abertura(Enum):
+    pass
+
+class Dom_Flujo_Agua(Enum):
+    pass
+
+class Dom_Geoestru(Enum):
+    pass
+
+class Dom_ClaseRoca(Enum):
+    pass
+
+class Dom_Facies(Enum):
+    pass
+
+class Dom_AmbMorfo(Enum):
+    pass
+
+class Dom_Paisaje(Enum):
+    pass
+
+class Dom_TipoRel(Enum):
+    pass
+
+class Dom_FormaTerr(Enum):
+    pass
+
+class Dom_Geomorf(Enum):
+    pass
+
+class Dom_ProvGeom(Enum):
+    pass
+
+class Dom_Region(Enum):
+    pass
+
+class Dom_Unidad(Enum):
+    pass
+
+class Dom_Subunidad(Enum):
+    pass
+
+class Dom_Componente(Enum):
+    pass
+
+class Dom_TipoProceso(Enum):
+    pass
+
+class Dom_NombProceso(Enum):
+    pass
+
+class Dom_PenSuelo(Enum):
+    pass
+
+class Dom_PisoTerm(Enum):
+    pass
+
+class Dom_ProvHum(Enum):
+    pass
+
+class Dom_ClaseHidrol(Enum):
+    pass
+
+class Dom_ClaseCapUso(Enum):
+    pass
+
+class Dom_EroSuelo(Enum):
+    pass
+
+class Dom_RemoMasa(Enum):
+    pass
+
+class Dom_DreSuelo(Enum):
+    pass
+
+class Dom_InunFrec(Enum):
+    pass
+
+class Dom_InunDur(Enum):
+    pass
+
+class Dom_ProfEfec(Enum):
+    pass
+
+class Dom_Frag_Suelo(Enum):
+    pass
+
+class Dom_PedregSuelo(Enum):
+    pass
+
+class Dom_AfloRoc(Enum):
+    pass
+
+class Dom_FerSuelo(Enum):
+    pass
+
+class Dom_CondSuelo(Enum):
+    pass
+
+class Dom_PH_Rango(Enum):
+    pass
+
+class Dom_SatAlumi(Enum):
+    pass
+
+class Dom_RelacionCaMg(Enum):
+    pass
+
+class Dom_PSI(Enum):
+    pass
+
+class Dom_TxtSue(Enum):
+    pass
+
+class Dom_EstrTipoSuelo(Enum):
+    pass
+
+class Dom_EstrClaseSuelo(Enum):
+    pass
+
+class Dom_TipoMaterial(Enum):
+    pass
+
+class Dom_HSuelo(Enum):
+    pass
+
+class Dom_FC_MonitSub(Enum):
+    pass
+
+class Dom_Porosid(Enum):
+    pass
+
+class Dom_MetVuln(Enum):
+    pass
+
+class Dom_VulnAcuif(Enum):
+    pass
+
+class Dom_ZonRec(Enum):
+    pass
+
+class Dom_TipEner(Enum):
+    pass
+
+class Dom_MedSur(Enum):
+    pass
+
+class Dom_TipMan(Enum):
+    pass
+
+class Dom_PerMan(Enum):
+    pass
+
+class Dom_CondiPunt(Enum):
+    pass
+
+class Dom_PunHidrogeo(Enum):
+    pass
+
+class Dom_ProvHidrogeo(Enum):
+    pass
+
+class Dom_PropPto(Enum):
+    pass
+
+class Dom_AH(Enum):
+    pass
+
+class Dom_ZH(Enum):
+    pass
+
+class Dom_SZH(Enum):
+    pass
+
+class Dom_Forma_IndComp(Enum):
+    pass
+
+class Dom_TipoDrenaje_IndSin(Enum):
+    pass
+
+class Dom_Margen(Enum):
+    pass
+
+class Dom_TipoCaudal(Enum):
+    pass
+
+class Dom_TipoFueSuperf(Enum):
+    pass
+
+class Dom_CuerpoRecep(Enum):
+    pass
+
+class Dom_Tipo_AguaR(Enum):
+    pass
+
+class Dom_T_Flujo(Enum):
+    pass
+
+class Dom_TiempoAforo(Enum):
+    pass
+
+class Dom_Parametro(Enum):
+    pass
+
+class Dom_Unidades(Enum):
+    pass
+
+class Dom_Tipo_Muest(Enum):
+    pass
+
+class Dom_Met_Nivel(Enum):
+    pass
+
+class Dom_Met_Niveles(Enum):
+    pass
+
+class Dom_Met_Oferta(Enum):
+    pass
+
+class Dom_Mat_Flota(Enum):
+    pass
+
+class Dom_Categ_Monit(Enum):
+    pass
+
+class Dom_PeriodMuest(Enum):
+    pass
+
+class Dom_FC_MonitAgua(Enum):
+    pass
+
+class Dom_TipoEstacion(Enum):
+    pass
+
+class Dom_RespEstacion(Enum):
+    pass
+
+class Dom_Variable(Enum):
+    pass
+
+class Dom_Direccion(Enum):
+    pass
+
+class Dom_Cober_Nubosidad(Enum):
+    pass
+
+class Dom_WForce(Enum):
+    pass
+
+class Dom_Visibility(Enum):
+    pass
+
+class Dom_SunGlare(Enum):
+    pass
+
+class Dom_DistrLluvias(Enum):
+    pass
+
+class Dom_Heladas(Enum):
+    pass
+
+class Dom_ZonClim(Enum):
+    pass
+
+class Dom_SisVig(Enum):
+    pass
+
+class Dom_Ajuste(Enum):
+    pass
+
+class Dom_Tipo_Ruido(Enum):
+    pass
+
+class Dom_Sub_Ruido(Enum):
+    pass
+
+class Dom_Intervalo(Enum):
+    pass
+
+class Dom_Jornada(Enum):
+    pass
+
+class Dom_Dia(Enum):
+    pass
+
+class Dom_TipoVehiculo(Enum):
+    pass
+
+class Dom_TipoCombustible(Enum):
+    pass
+
+class Dom_FC_FueDisp(Enum):
+    pass
+
+class Dom_Contaminante(Enum):
+    pass
+
+class Dom_SistEcologicoN1(Enum):
+    pass
+
+class Dom_SistEcologicoN2(Enum):
+    pass
+
+class Dom_RegBiogeo(Enum):
+    pass
+
+class Dom_ProviMar(Enum):
+    pass
+
+class Dom_Ecozo(Enum):
+    pass
+
+class Dom_Ecoreg(Enum):
+    pass
+
+class Dom_Caracsitio(Enum):
+    pass
+
+class Dom_SubcTectonica(Enum):
+    pass
+
+class Dom_SubcFisiograf(Enum):
+    pass
+
+class Dom_TGeoforma(Enum):
+    pass
+
+class Dom_TipoCostaGeol(Enum):
+    pass
+
+class Dom_TipoCostaGmrf(Enum):
+    pass
+
+class Dom_Exposicion(Enum):
+    pass
+
+class Dom_Pendiente(Enum):
+    pass
+
+class Dom_TempMarino(Enum):
+    pass
+
+class Dom_Muestreador(Enum):
+    pass
+
+class Dom_Contrato(Enum):
+    pass
+
+class Dom_Embarcacion(Enum):
+    pass
+
+class Dom_TipoCaladero(Enum):
+    pass
+
+class Dom_ClaCaladero(Enum):
+    pass
+
+class Dom_ArtePesca(Enum):
+    pass
+
+class Dom_GranBioma(Enum):
+    pass
+
+class Dom_Bioma(Enum):
+    pass
+
+class Dom_DistriBiogeogra(Enum):
+    pass
+
+class Dom_Ecosistema(Enum):
+    pass
+
+class Dom_Hidrobiota(Enum):
+    pass
+
+class Dom_Activ_Econo(Enum):
+    pass
+
+class Dom_PoblaDesplaz(Enum):
+    pass
+
+class Dom_TransPublico(Enum):
+    pass
+
+class Dom_MediosComu(Enum):
+    pass
+
+class Dom_Tip_Asenta(Enum):
+    pass
+
+class Dom_DesEconom(Enum):
+    pass
+
+class Dom_EstrucPropiedad(Enum):
+    pass
+
+class Dom_TipoViv(Enum):
+    pass
+
+class Dom_ParedViv(Enum):
+    pass
+
+class Dom_PisoViv(Enum):
+    pass
+
+class Dom_CostBenef(Enum):
+    pass
+
+class Dom_MetValEcon(Enum):
+    pass
+
+class Dom_TipoValor(Enum):
+    pass
+
+class Dom_ServEco(Enum):
+    pass
+
+class Dom_CatSEE(Enum):
+    pass
+
+class Dom_SSEE(Enum):
+    pass
+
+class Dom_CondiInternaliz(Enum):
+    pass
+
+class Dom_ConcepServ(Enum):
+    pass
+
+class Dom_Potencial(Enum):
+    pass
+
+class Dom_Sitio(Enum):
+    pass
+
+class Dom_Potestad(Enum):
+    pass
+
+class Dom_AtracEscen(Enum):
+    pass
+
+class Dom_EscalaVisual(Enum):
+    pass
+
+class Dom_NiveldeInteres(Enum):
+    pass
+
+class Dom_IndDiscord(Enum):
+    pass
+
+class Dom_IndPaisaje(Enum):
+    pass
+
+class Dom_IntegriEscenica(Enum):
+    pass
+
+class Dom_UniCarto(Enum):
+    pass
+
+class Dom_Clasif_Infra(Enum):
+    pass
+
+class Dom_EstadoProyec(Enum):
+    pass
+
+class Dom_Calidad(Enum):
+    pass
+
+class Dom_ClaseVia(Enum):
+    pass
+
+class Dom_ObraDren(Enum):
+    pass
+
+class Dom_ClasifProyec(Enum):
+    pass
+
+class Dom_TipoRuta(Enum):
+    pass
+
+class Dom_TipoVia(Enum):
+    pass
+
+class Dom_TipoDragado(Enum):
+    pass
+
+class Dom_EstaInf(Enum):
+    pass
+
+class Dom_Adecuacion(Enum):
+    pass
+
+class Dom_TipoDiseno(Enum):
+    pass
+
+class Dom_ResidSol(Enum):
+    pass
+
+class Dom_ManResid(Enum):
+    pass
+
+class Dom_Fase_Proyec(Enum):
+    pass
+
+class Dom_Tipo_Evento(Enum):
+    pass
+
+class Dom_GradAmen(Enum):
+    pass
+
+class Dom_Ocurrencia(Enum):
+    pass
+
+class Dom_Fuente_Evento(Enum):
+    pass
+
+class Dom_Estado_Evento(Enum):
+    pass
+
+class Dom_Material_UGS(Enum):
+    pass
+
+class Dom_Rango(Enum):
+    pass
+
+class Dom_Accesibilidad(Enum):
+    pass
+
+class Dom_Esce_Ame_MM(Enum):
+    pass
+
+class Dom_Grado_Estab(Enum):
+    pass
+
+class Dom_CategRiesgo(Enum):
+    pass
+
+class Dom_CausaConting(Enum):
+    pass
+
+class Dom_Clasif_Conting(Enum):
+    pass
+
+class Dom_TipoReporte(Enum):
+    pass
+
+class Dom_ApoyoExt(Enum):
+    pass
+
+class Dom_AreaSolicitada(Enum):
+    pass
+
+class Dom_Internacional(Enum):
+    pass
+
+class Dom_Nacional(Enum):
+    pass
+
+class Dom_Regional(Enum):
+    pass
+
+class Dom_Local(Enum):
+    pass
+
+class Dom_ZonManejo(Enum):
+    pass
+
