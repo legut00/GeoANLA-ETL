@@ -472,6 +472,34 @@ class Seg_EspSembradaTB(BaseEV):
             raise ValueError("Mantenimiento anterior a siembra.")
         return self
 
+    @model_validator(mode='after')
+    def validate_individuals_totals(self) -> 'Seg_EspSembradaTB':
+        """Valida que el histórico de siembra sea congruente con el periodo reportado."""
+        if self.INDIV_SEMB > self.TOT_IN_SMB:
+            raise ValueError(
+                f"Inconsistencia métrica: Los individuos sembrados en el periodo actual "
+                f"(INDIV_SEMB={self.INDIV_SEMB}) no pueden superar el acumulado histórico "
+                f"(TOT_IN_SMB={self.TOT_IN_SMB})."
+            )
+        return self
+
+    @model_validator(mode='after')
+    def validate_maintenance_logic(self) -> 'Seg_EspSembradaTB':
+        """Valida la coherencia de las actividades de mantenimiento reportadas."""
+        if self.MANT_PER > 0:
+            actividad = self.ACT_MANT.strip().upper() if self.ACT_MANT else ""
+            if not actividad or actividad in ["N/A", "NA", "NO APLICA", "NINGUNA", "NINGUNO", "SIN ACTIVIDAD"]:
+                raise ValueError(
+                    f"Reporta {self.MANT_PER} mantenimientos en el periodo (MANT_PER), "
+                    f"por lo que debe especificar las actividades reales en ACT_MANT."
+                )
+        elif self.MANT_PER == 0:
+            actividad = self.ACT_MANT.strip().upper() if self.ACT_MANT else ""
+            if actividad and actividad not in ["", "N/A", "NA", "NO APLICA", "NINGUNA", "NINGUNO", "SIN ACTIVIDAD"]:
+                 raise ValueError("Si MANT_PER es 0, no deberían reportarse actividades en ACT_MANT.")
+                 
+        return self
+
 class MuestreoFaunaResultadosTB(BaseEV):
     """
     Tabla de Muestreo de Fauna - Resultados.
