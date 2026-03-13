@@ -56,3 +56,19 @@ class Predios(BaseEV_Geo):
                     "colectiva', debe identificar el tipo en TENE_COLEC."
                 )
         return self
+class EstructuraPropiedad(BaseEV_Geo):
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
+    pass
+
+class PoblacionReasentar(BaseEV_Geo):
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
+    pass
+
+class PoblacionReceptora(BaseEV_Geo):
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
+    pass
+
+class RutaMovilizacion(BaseEV_Geo):
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
+    pass
+

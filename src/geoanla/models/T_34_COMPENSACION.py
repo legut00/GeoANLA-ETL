@@ -202,3 +202,11 @@ class OtraCompensacion(BaseEV_Geo):
                     f"compensar ({self.AREA_COMP})"
                 )
         return self
+class CompensacionBiodiversidad(BaseEV_Geo):
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
+    pass
+
+class Compens_OTAutorPT(BaseEV_Geo):
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
+    pass
+

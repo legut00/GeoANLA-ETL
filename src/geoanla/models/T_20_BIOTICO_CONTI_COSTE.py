@@ -423,4 +423,23 @@ class TransectoMuestreoFauna(BaseEV_Geo):
                 f"La cota máxima ({self.COTA_MAX}) es menor que la "
                 f"mínima ({self.COTA_MIN})"
             )
-        return self
+        return selfclass AprovechaForestalPG(BaseEV_Geo):
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
+    pass
+
+class AprovechaForestalPT(BaseEV_Geo):
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
+    pass
+
+class Ecosistema(BaseEV_Geo):
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
+    pass
+
+class SitioImportanciaContinental(BaseEV_Geo):
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
+    pass
+
+class SitioImportanciaCostero(BaseEV_Geo):
+    model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
+    pass
+
