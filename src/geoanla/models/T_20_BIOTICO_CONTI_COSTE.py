@@ -423,7 +423,9 @@ class TransectoMuestreoFauna(BaseEV_Geo):
                 f"La cota máxima ({self.COTA_MAX}) es menor que la "
                 f"mínima ({self.COTA_MIN})"
             )
-        return selfclass AprovechaForestalPG(BaseEV_Geo):
+        return self
+
+class AprovechaForestalPG(BaseEV_Geo):
     model_config = ConfigDict(use_enum_values=True, validate_assignment=True)
     pass
 
