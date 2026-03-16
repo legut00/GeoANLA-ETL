@@ -1,13 +1,15 @@
 <div align="center">
 
-# 🌍 GeoANLA-ETL: Validador Open Source de Datos Espaciales para el ANLA
+<img src="./docs/logo.png" alt="GeoANLA Mascot" width="250"/>
+
+# Validador Open Source de Datos Espaciales para el ANLA
 
 ![Arquitectura GeoANLA-ETL](./docs/arquitectura_etl.png)
 
 *Herramienta colaborativa Open Source para la validación, estructuración y exportación de datos geográficos bajo el estándar de la Autoridad Nacional de Licencias Ambientales (ANLA) en Colombia.*
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg?logo=python&logoColor=white)](https://www.python.org/downloads/)
-[![Rust](https://img.shields.io/badge/Polars-Rust-black.svg?logo=rust)](https://pola.rs/)
+[![Rust](https://img.shields.io/badge/Rust-1.90.0+-orange.svg?logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 </div>
