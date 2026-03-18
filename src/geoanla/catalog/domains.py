@@ -560,22 +560,22 @@ class Dom_Sector(float, Enum):
     Dominio: Dom_Sector
     Descripción: Identifica el sector económico al que corresponde el proyecto licenciado.
     """
-    ENERGIA = 1.0
-    INFRAESTRUCTURA = 2.0
-    MINERIA = 3.0
-    HIDROCARBUROS = 4.0
-    AGROQUIMICOS = 5.0
-    OTRO = 6.0
+    HIDROCARBUROS = 101.0
+    INFRAESTRUCTURA = 102.0
+    MINERIA = 103.0
+    ENERGIA = 104.0
+    AGROQUIMICOS = 105.0
+    PROYECTOS_ESPECIALES = 106.0
 
     @property
     def description(self):
         descripciones = {
-            1.0: "Energía",
-            2.0: "Infraestructura",
-            3.0: "Minería",
-            4.0: "Hidrocarburos",
-            5.0: "Agroquímicos",
-            6.0: "Otro"
+            101.0: "Hidrocarburos",
+            102.0: "Infraestructura",
+            103.0: "Minería",
+            104.0: "Energía",
+            105.0: "Agroquímicos",
+            106.0: "Proyectos Especiales"
         }
         return descripciones.get(self.value)
 
