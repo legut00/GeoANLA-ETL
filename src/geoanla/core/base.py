@@ -193,6 +193,59 @@ class BaseEV(BaseModel):
             return df_out
 
     @classmethod
+    def translate_code_to_text(cls, df: Union[pl.DataFrame, pd.DataFrame, gpd.GeoDataFrame]) -> Any:
+        """
+        Traducción inversa vectorizada. Mapea códigos numéricos a sus 
+        textos descriptivos oficiales (o nombres de Enum) para facilitar el análisis humano.
+        """
+        dominios = cls.get_domains()
+        columnas_disponibles = set(df.columns)
+        
+        # --- CASO A: POLARS ---
+        if isinstance(df, pl.DataFrame):
+            expresiones = []
+            for campo, clase_enum in dominios.items():
+                if campo not in columnas_disponibles or not isinstance(clase_enum, type):
+                    continue
+                
+                # Obtenemos el diccionario {código: texto}
+                mapping = cls.domain(campo)
+                if not mapping:
+                    continue
+                    
+                # Convertimos las llaves a string para evitar conflictos de tipado estricto en Polars 
+                # (una columna no puede tener ints y strings al mismo tiempo durante el replace)
+                mapping_str = {str(k): str(v) for k, v in mapping.items() if pd.notnull(k)}
+                
+                expr = (
+                    pl.col(campo).cast(pl.Utf8)  # Castear la columna original a texto
+                    .replace(mapping_str, default=pl.col(campo).cast(pl.Utf8))
+                    .alias(campo)
+                )
+                expresiones.append(expr)
+            
+            return df.with_columns(expresiones) if expresiones else df
+
+        # --- CASO B: PANDAS / GEOPANDAS ---
+        else:
+            df_out = df.copy()
+            
+            for campo, clase_enum in dominios.items():
+                if campo not in columnas_disponibles or not isinstance(clase_enum, type):
+                    continue
+                
+                mapping = cls.domain(campo)
+                if not mapping:
+                    continue
+                
+                # 'map' traduce usando el diccionario. Deja 'NaN' en los valores que no encuentre.
+                serie_mapeada = df_out[campo].map(mapping)
+                # 'fillna' permite conservar el valor numérico original en caso de que un valor no existiese en el Enum
+                df_out[campo] = serie_mapeada.fillna(df_out[campo])
+                    
+            return df_out
+
+    @classmethod
     def domain(cls, nombre_campo: str) -> Dict[Any, str]:
         if nombre_campo in cls._dominios_externos: return cls._dominios_externos[nombre_campo]
         doms = cls.get_domains()
