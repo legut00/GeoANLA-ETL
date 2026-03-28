@@ -15,7 +15,8 @@ dependencies = [
     "polars>=0.20.0",
     "fastexcel",
     "requests>=2.31.0",
-    "pygbif"
+    "pygbif",
+    "python-dotenv"
 ]
 
 [tool.setuptools.packages.find]

@@ -1,5 +1,11 @@
-import difflib
+import os
+import requests
+from dotenv import load_dotenv
 from typing import Optional, Union, List, Dict
+from pygbif import occurrences
+
+# Cargar variables de entorno (por si el usuario tiene un .env local)
+load_dotenv()
 from pygbif import occurrences
 
 # Importar los dominios desde el catálogo oficial
@@ -11,6 +17,7 @@ from geoanla.catalog.corineland import (
     Dom_Nivel5_Cober,
     Dom_Nivel6_Cober
 )
+from geoanla.catalog.domains import Dom_Amenaza
 
 def search_corine_land_cover(
     NOMENCLAT: Optional[Union[int, float]] = None,
@@ -111,3 +118,79 @@ def search_occurrences_gbif(nombre_original: Optional[str] = None) -> Dict[str, 
 
     except Exception as e:
         return {"ESPECIE_GBIF": f"Error: {str(e)}"}
+
+def get_uicn_category_description(api_code: str) -> str:
+    """Mapea el código corto de la UICN al dominio de amenaza oficial en GeoANLA."""
+    for item in Dom_Amenaza:
+        if item.description and item.description.endswith(f"({api_code})"):
+            return item.description
+    return Dom_Amenaza.NO_EVALUADO.description
+
+def search_uicn_api(nombre_cientifico: Optional[str] = None) -> Dict[str, str]:
+    """
+    Busca la categoría de amenaza de una especie en la API de la UICN de forma segura.
+    Retorna la sigla de la API y la descripción oficial mapeada a los dominios del proyecto.
+    
+    :param nombre_cientifico: [str] Nombre científico de la especie (ej. "Tremarctos ornatus").
+    :return: Diccionario con la sigla y su equivalencia en el catálogo.
+    """
+    if not isinstance(nombre_cientifico, str) or not nombre_cientifico.strip():
+        return {"SIGLA_UICN_API": "NE", "CATEG_UICN": Dom_Amenaza.NO_EVALUADO.description}
+    
+    parts = nombre_cientifico.strip().split()
+    if len(parts) < 2:
+        return {"SIGLA_UICN_API": "NE", "CATEG_UICN": Dom_Amenaza.NO_EVALUADO.description}
+        
+    genus = parts[0]
+    species = parts[1]
+    
+    token = os.getenv("UICN_API_TOKEN")
+    if not token:
+        # En vez de romper ejecución masiva, devolvemos error claro.
+        return {"SIGLA_UICN_API": "ERROR_TOKEN", "CATEG_UICN": "Sin Token en .env"}
+
+    headers = {
+        "accept": "application/json",
+        "Authorization": token
+    }
+    
+    url = "https://api.iucnredlist.org/api/v4/taxa/scientific_name"
+    params = {
+        "genus_name": genus,
+        "species_name": species
+    }
+    
+    try:
+        response = requests.get(url, params=params, headers=headers)
+        
+        if response.status_code == 404:
+            sigla = "NE"
+        elif response.status_code != 200:
+            sigla = f"HTTP_{response.status_code}"
+        else:
+            data = response.json()
+            lista_evaluaciones = data.get('assessments', [])
+            
+            if not lista_evaluaciones:
+                sigla = "NE"
+            else:
+                reporte_actual = next((item for item in lista_evaluaciones if item.get('latest') is True), None)
+                if reporte_actual:
+                    sigla = reporte_actual.get('red_list_category_code', 'NE')
+                else:
+                    sigla = "NE"
+                    
+    except requests.exceptions.RequestException:
+        sigla = "ERROR_CONEXION"
+    except Exception:
+        sigla = "ERROR"
+
+    if sigla in ["NE", "ERROR", "ERROR_CONEXION", "ERROR_TOKEN"] or sigla.startswith("HTTP"):
+        desc_oficial = Dom_Amenaza.NO_EVALUADO.description if sigla == "NE" else f"Error: {sigla}"
+    else:
+        desc_oficial = get_uicn_category_description(sigla)
+
+    return {
+        "SIGLA_UICN_API": sigla,
+        "CATEG_UICN": desc_oficial
+    }
