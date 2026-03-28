@@ -14,7 +14,8 @@ dependencies = [
     "pydantic>=2.0.0",
     "polars>=0.20.0",
     "fastexcel",
-    "requests>=2.31.0"
+    "requests>=2.31.0",
+    "pygbif"
 ]
 
 [tool.setuptools.packages.find]

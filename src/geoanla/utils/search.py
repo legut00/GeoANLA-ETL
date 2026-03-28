@@ -1,5 +1,6 @@
 import difflib
 from typing import Optional, Union, List, Dict
+from pygbif import occurrences
 
 # Importar los dominios desde el catálogo oficial
 from geoanla.catalog.corineland import (
@@ -78,3 +79,35 @@ def search_corine_land_cover(
                 })
                 
     return resultados
+
+def search_occurrences_gbif(nombre_original: Optional[str] = None) -> Dict[str, Optional[str]]:
+    """
+    Busca la jerarquía taxonómica completa en GBIF a partir del nombre original.
+    
+    :param nombre_original: [str] Nombre de la especie a buscar.
+    :return: Diccionario con la información taxonómica correspondiente (DIVISION, CLASE, ORDEN, FAMILIA, GENERO, ESPECIE).
+    """
+    if not isinstance(nombre_original, str) or not nombre_original.strip():
+        return {"ESPECIE_GBIF": "NO ENCONTRADO"}
+        
+    try:
+        response = occurrences.search(q=nombre_original, limit=1)
+
+        if response and response.get('results'):
+            registro = response['results'][0]
+            
+            # Extraemos toda la jerarquía usando las llaves del JSON de GBIF
+            # GBIF suele usar 'phylum' para lo que referimos como 'DIVISION'
+            return {
+                "DIVISION_GBIF": registro.get('phylum'), 
+                "CLASE_GBIF": registro.get('class'),
+                "ORDEN_GBIF": registro.get('order'),
+                "FAMILIA_GBIF": registro.get('family'),
+                "GENERO_GBIF": registro.get('genus'),
+                "ESPECIE_GBIF": registro.get('species', registro.get('scientificName', 'NO ENCONTRADO'))
+            }
+        else:
+            return {"ESPECIE_GBIF": "NO ENCONTRADO"}
+
+    except Exception as e:
+        return {"ESPECIE_GBIF": f"Error: {str(e)}"}
