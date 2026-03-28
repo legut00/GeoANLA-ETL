@@ -17,7 +17,7 @@ from geoanla.catalog.corineland import (
     Dom_Nivel5_Cober,
     Dom_Nivel6_Cober
 )
-from geoanla.catalog.domains import Dom_Amenaza
+from geoanla.catalog.domains import Dom_Amenaza, Dom_Apendice
 
 def search_corine_land_cover(
     NOMENCLAT: Optional[Union[int, float]] = None,
@@ -193,4 +193,81 @@ def search_uicn_api(nombre_cientifico: Optional[str] = None) -> Dict[str, str]:
     return {
         "SIGLA_UICN_API": sigla,
         "CATEG_UICN": desc_oficial
+    }
+
+def get_cites_category_description(api_cites: str) -> str:
+    """Mapea el apéndice CITES devuelto por Species+ al dominio oficial en GeoANLA."""
+    if api_cites in ["NC", "No aplica", "NE", "ERROR"]:
+        return Dom_Apendice.NO_APLICA.description
+    
+    # Formamos el texto esperado (ej. "Apendice I")
+    expected_desc = f"Apendice {api_cites}"
+    
+    for item in Dom_Apendice:
+        if item.description and item.description == expected_desc:
+            return item.description
+            
+    # Fallback robusto en caso de que devuelva algo como "I/II"
+    for apendice in ["I", "II", "III"]:
+        if apendice in api_cites:
+            return f"Apendice {apendice}"
+            
+    return Dom_Apendice.NO_APLICA.description
+
+def search_cites_api(nombre_cientifico: Optional[str] = None) -> Dict[str, str]:
+    """
+    Busca el apéndice CITES de una especie usando la API de Species+.
+    Retorna la sigla original de la API ("I", "II", "NC") y su descripción oficial en Dom_Apendice.
+    
+    :param nombre_cientifico: [str] Nombre científico de la especie (ej. "Puma concolor").
+    :return: Diccionario con la sigla original de la API y su equivalencia corporativa.
+    """
+    if not isinstance(nombre_cientifico, str) or not nombre_cientifico.strip():
+        return {"SIGLA_CITES_API": "NC", "CATEG_CITES": Dom_Apendice.NO_APLICA.description}
+    
+    token = os.getenv("CITES_API_TOKEN")
+    if not token:
+        return {"SIGLA_CITES_API": "ERROR_TOKEN", "CATEG_CITES": "Sin Token en .env"}
+
+    url = "https://api.speciesplus.net/api/v1/taxon_concepts"
+    headers = {
+        "X-Authentication-Token": token,
+        "Accept": "application/json"
+    }
+    params = {
+        "name": nombre_cientifico.strip()
+    }
+
+    try:
+        # Timeout de 10 segundos como buena práctica en llamadas externas
+        response = requests.get(url, headers=headers, params=params, timeout=10)
+        
+        if response.status_code != 200:
+            sigla = f"HTTP_{response.status_code}"
+        else:
+            data = response.json()
+            conceptos = data.get('taxon_concepts', [])
+            
+            if not conceptos:
+                sigla = "NC"
+            else:
+                cites = conceptos[0].get('cites_listing', 'NC')
+                if not cites or cites == 'NC':
+                    sigla = "NC"
+                else:
+                    sigla = str(cites).strip()
+
+    except requests.exceptions.RequestException:
+        sigla = "ERROR_CONEXION"
+    except Exception:
+        sigla = "ERROR"
+
+    if sigla in ["NC", "ERROR", "ERROR_CONEXION", "ERROR_TOKEN"] or sigla.startswith("HTTP"):
+        desc_oficial = Dom_Apendice.NO_APLICA.description if sigla == "NC" else f"Error: {sigla}"
+    else:
+        desc_oficial = get_cites_category_description(sigla)
+
+    return {
+        "SIGLA_CITES_API": sigla,
+        "CATEG_CITES": desc_oficial
     }
