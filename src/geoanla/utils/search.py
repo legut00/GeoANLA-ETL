@@ -1,5 +1,6 @@
 import os
 import requests
+import difflib
 from dotenv import load_dotenv
 from typing import Optional, Union, List, Dict
 from pygbif import occurrences
